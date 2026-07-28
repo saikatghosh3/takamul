@@ -16,6 +16,7 @@ function Calendar({ value, onChange, minDate, availableDates, loading, source })
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
 
+  
   const today = useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
