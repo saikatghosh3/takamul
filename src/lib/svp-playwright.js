@@ -61,7 +61,7 @@ async function ensureManagedBrowser() {
   if (!token) throw new Error('Not authenticated');
 
   managedBrowser = await chromium.launch({
-    headless: 'new',
+    headless: true,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -89,6 +89,58 @@ async function ensureManagedBrowser() {
   }, token);
 
   managedPage = await managedContext.newPage();
+
+  // ─── Network Interceptor for Create Reservation API (rebook) ────
+  await managedPage.route('**/individual_labor_space/exam_reservations', async (route) => {
+    const request = route.request();
+    if (request.method() !== 'POST') {
+      await route.continue();
+      return;
+    }
+    let payload = {};
+    try {
+      payload = JSON.parse(request.postData() || '{}');
+    } catch {}
+    console.log('');
+    console.log('╔═══════════════════════════════════════════════════════════');
+    console.log('║  [NETWORK INTERCEPTOR] Create/Rebook Request Intercepted');
+    console.log('╠═══════════════════════════════════════════════════════════');
+    console.log(`║  URL:    ${request.url()}`);
+    console.log(`║  Method: ${request.method()}`);
+    console.log('╠═══════════════════════════════════════════════════════════');
+    console.log(`║  PAYLOAD BEFORE SENDING TO SVPI API:`);
+    console.log(`║  ${JSON.stringify(payload, null, 2).split('\n').join('\n║  ')}`);
+    console.log('╚═══════════════════════════════════════════════════════════');
+    console.log('');
+    await route.continue({
+      postData: JSON.stringify(payload)
+    });
+  });
+
+  // ─── Network Interceptor for Reschedule API ─────────────────────
+  await managedPage.route('**/exam_reservations/*/reschedule', async (route) => {
+    const request = route.request();
+    let payload = {};
+    try {
+      payload = JSON.parse(request.postData() || '{}');
+    } catch {}
+    console.log('');
+    console.log('╔═══════════════════════════════════════════════════════════');
+    console.log('║  [NETWORK INTERCEPTOR] Reschedule Request Intercepted');
+    console.log('╠═══════════════════════════════════════════════════════════');
+    console.log(`║  URL:    ${request.url()}`);
+    console.log(`║  Method: ${request.method()}`);
+    console.log('╠═══════════════════════════════════════════════════════════');
+    console.log(`║  PAYLOAD BEFORE SENDING TO SVPI API:`);
+    console.log(`║  ${JSON.stringify(payload, null, 2).split('\n').join('\n║  ')}`);
+    console.log('╚═══════════════════════════════════════════════════════════');
+    console.log('');
+    await route.continue({
+      postData: JSON.stringify(payload)
+    });
+  });
+  // ─────────────────────────────────────────────────────────────────
+
   await managedPage.goto(SVP_BASE, { waitUntil: 'domcontentloaded', timeout: 30000 });
   await managedPage.waitForTimeout(3000);
   managedBrowserReady = true;
@@ -296,7 +348,7 @@ export async function browserFetch(url, options = {}) {
   }
 
   try {
-    const result = await page.evaluate(async (fetchUrl, fetchMethod, fetchBody, fetchToken) => {
+    const result = await page.evaluate(async ({ fetchUrl, fetchMethod, fetchBody, fetchToken }) => {
       const headers = { 'Accept': 'application/json', 'Authorization': `Bearer ${fetchToken}` };
       if (fetchMethod === 'POST' || fetchMethod === 'PUT' || fetchMethod === 'PATCH') {
         headers['Content-Type'] = 'application/json';
@@ -311,7 +363,7 @@ export async function browserFetch(url, options = {}) {
       let data;
       try { data = JSON.parse(text); } catch { data = text; }
       return { status: res.status, ok: res.ok, data };
-    }, url, method, options.body || null, token);
+    }, { fetchUrl: url, fetchMethod: method, fetchBody: options.body || null, fetchToken: token });
     return result;
   } catch (err) {
     managedBrowserReady = false;
@@ -323,7 +375,7 @@ export async function browserFetch(url, options = {}) {
   }
 }
 
-// ─── RESCHEDULE VIA DIRECT API ──────────────────────────────────
+// ─── RESCHEDULE VIA BROWSER FETCH (enables page.route interception) ──
 
 export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId) {
   const token = getAuthToken();
@@ -332,57 +384,92 @@ export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCente
   const url = `${SVP_API_BASE}/individual_labor_space/exam_reservations/${sessionId}/reschedule`;
   console.log(`[API RESCHEDULE] POST ${url}`);
 
-  const headers = {
-    'Accept': 'application/json',
-    'Content-Type': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Origin': SVP_BASE,
-    'Referer': `${SVP_BASE}/`,
-    'Authorization': `Bearer ${token}`
-  };
-
   try {
-    if (examSessionId) {
-      const body = { exam_session_id: Number(examSessionId) || examSessionId };
+    let body = {};
+
+    if (testCenterId) {
+      // ─── NEW CENTER SPECIFIED ─────────────────────────────────
+      // Use test_date + test_center_id to force the backend to re-assign.
+      // Do NOT include exam_session_id — it carries the old center assignment
+      // and would override the new test_center_id.
+      body = {
+        test_date: newDate,
+        test_center_id: Number(testCenterId) || testCenterId,
+        category_id: Number(categoryId) || categoryId
+      };
+    } else if (examSessionId) {
+      // ─── ONLY DATE CHANGE (same center) ───────────────────────
+      body = { exam_session_id: Number(examSessionId) || examSessionId };
       if (categoryId) body.category_id = Number(categoryId) || categoryId;
-      if (testCenterId) body.test_center_id = Number(testCenterId) || testCenterId;
       if (newDate) body.test_date = newDate;
-      console.log(`[API RESCHEDULE] Body (with exam_session_id): ${JSON.stringify(body)}`);
-      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = text; }
-      console.log(`[API RESCHEDULE] Response: ${res.status} ${res.statusText}`);
-      console.log(`[API RESCHEDULE] Response body: ${JSON.stringify(data).substring(0, 500)}`);
-      if (res.ok) return { ok: true, status: res.status, data };
-      if (res.status !== 422 && res.status !== 404) return { ok: false, status: res.status, data };
-      console.log(`[API RESCHEDULE] Trying fallback with test_date only...`);
-    }
-
-    if (newDate) {
-      const body = { test_date: newDate };
+    } else if (newDate) {
+      // ─── DATE ONLY (fallback) ─────────────────────────────────
+      body = { test_date: newDate };
       if (categoryId) body.category_id = Number(categoryId) || categoryId;
-      if (testCenterId) body.test_center_id = Number(testCenterId) || testCenterId;
-      console.log(`[API RESCHEDULE] Body (with test_date fallback): ${JSON.stringify(body)}`);
-      const res = await fetch(url, { method: 'POST', headers, body: JSON.stringify(body) });
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = text; }
-      console.log(`[API RESCHEDULE] Response: ${res.status} ${res.statusText}`);
-      console.log(`[API RESCHEDULE] Response body: ${JSON.stringify(data).substring(0, 500)}`);
-      if (res.ok) return { ok: true, status: res.status, data };
-      return { ok: false, status: res.status, data };
+    } else {
+      return { ok: false, error: 'No valid parameters provided' };
     }
 
-    return { ok: false, error: 'No examSessionId or newDate provided' };
+    console.log(`[API RESCHEDULE] Payload to SVPI: ${JSON.stringify(body)}`);
+
+    // Use browserFetch so the request goes through the Playwright browser page.
+    // This triggers the page.route() interceptor in ensureManagedBrowser(),
+    // which logs and allows inspection of the payload before it reaches SVPI.
+    const result = await browserFetch(url, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+
+    console.log(`[API RESCHEDULE] Response: ${result.status} ${result.ok ? 'OK' : 'FAIL'}`);
+    console.log(`[API RESCHEDULE] Response body: ${JSON.stringify(result.data).substring(0, 500)}`);
+
+    return result;
   } catch (err) {
-    console.error(`[API RESCHEDULE] Network error: ${err.message}`);
+    console.error(`[API RESCHEDULE] Error: ${err.message}`);
     return { ok: false, error: err.message };
   }
 }
 
 export async function rescheduleViaPlaywright(sessionId, newDate, categoryId, testCenterId, examSessionId) {
   return rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId);
+}
+
+// ─── REBOOK VIA BROWSER FETCH (creates new reservation after cancellation) ──
+
+export async function rebookViaAPI({ occupationId, examSessionId, languageCode, methodology, categoryId, cityName, testDate }) {
+  const token = getAuthToken();
+  if (!token) throw new Error('Not authenticated. Please login first.');
+
+  const url = `${SVP_API_BASE}/individual_labor_space/exam_reservations`;
+  console.log(`[API REBOOK] POST ${url}`);
+
+  try {
+    const body = {
+      occupation_id: Number(occupationId) || occupationId,
+      exam_session_id: examSessionId,
+      language_code: languageCode || 'en',
+      methodology: Number(methodology) || methodology || 1,
+      country_id: 78,
+      accept_declaration: true,
+      info_confirmation: true,
+      practical_confirmation: true
+    };
+
+    console.log(`[API REBOOK] Payload to SVPI: ${JSON.stringify(body)}`);
+
+    const result = await browserFetch(url, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+
+    console.log(`[API REBOOK] Response: ${result.status} ${result.ok ? 'OK' : 'FAIL'}`);
+    console.log(`[API REBOOK] Response body: ${JSON.stringify(result.data).substring(0, 500)}`);
+
+    return result;
+  } catch (err) {
+    console.error(`[API REBOOK] Error: ${err.message}`);
+    return { ok: false, error: err.message };
+  }
 }
 
 // ─── CANCEL VIA DIRECT API ──────────────────────────────────────
@@ -430,6 +517,83 @@ export async function cancelViaAPI(sessionId, reason) {
 
 export async function cancelViaPlaywright(sessionId, reason) {
   return cancelViaAPI(sessionId, reason);
+}
+
+// ─── PEEK SESSION TIME (trial book + cancel to extract test_time) ──
+
+export async function peekSessionTime({ occupationId, examSessionId, languageCode, methodology }) {
+  const token = getAuthToken();
+  if (!token) return { ok: false, error: 'Not authenticated' };
+
+  const url = `${SVP_API_BASE}/individual_labor_space/exam_reservations`;
+  const body = {
+    occupation_id: Number(occupationId) || occupationId,
+    exam_session_id: examSessionId,
+    language_code: languageCode || 'en',
+    methodology: Number(methodology) || methodology || 1,
+    country_id: 78,
+    accept_declaration: true,
+    info_confirmation: true,
+    practical_confirmation: true
+  };
+
+  try {
+    console.log(`[PEEK] POST ${url}`);
+
+    // Use browserFetch so the request goes through Playwright page context
+    // (avoids Cloudflare 529 rate limiting on direct Node.js fetches)
+    const result = await browserFetch(url, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    });
+
+    console.log(`[PEEK] Status: ${result.status}`);
+    console.log(`[PEEK] Response body: ${JSON.stringify(result.data).substring(0, 1000)}`);
+
+    if (!result.ok) {
+      const errMsg = result.data?.message || result.data?.error || (typeof result.data === 'string' ? result.data : JSON.stringify(result.data)) || 'Peek failed';
+      console.log(`[PEEK] Error: ${errMsg}`);
+      return { ok: false, status: result.status, error: errMsg };
+    }
+
+    const reservation = result.data?.exam_reservation || result.data;
+    const testTime = reservation?.exam_session?.test_time || '';
+    const reservationId = reservation?.id;
+    const testDate = reservation?.exam_session?.test_date || '';
+    console.log(`[PEEK] test_time="${testTime}" reservation_id=${reservationId}`);
+
+    let cancelResult = null;
+    if (reservationId) {
+      try {
+        const cancelRes = await fetch(
+          `${SVP_API_BASE}/individual_labor_space/exam_reservations/${reservationId}/cancel`,
+          {
+            method: 'POST',
+            headers: {
+              'Accept': 'application/json',
+              'Content-Type': 'application/json',
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+              'Origin': SVP_BASE,
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ cancellation_reason: 'Time discovery' })
+          }
+        );
+        const cancelText = await cancelRes.text();
+        let cancelData;
+        try { cancelData = JSON.parse(cancelText); } catch { cancelData = cancelText; }
+        cancelResult = { ok: cancelRes.ok, status: cancelRes.status, data: cancelData };
+        console.log(`[PEEK] Cancel: ${cancelRes.status} ${cancelRes.ok ? 'OK' : 'FAIL'}`);
+      } catch (cancelErr) {
+        cancelResult = { ok: false, error: cancelErr.message };
+      }
+    }
+
+    return { ok: true, testTime, reservationId, testDate, cancelResult };
+  } catch (err) {
+    console.error(`[PEEK] Error: ${err.message}`);
+    return { ok: false, error: err.message };
+  }
 }
 
 // ─── Cleanup ────────────────────────────────────────────────────

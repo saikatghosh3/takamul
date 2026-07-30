@@ -1,0 +1,152 @@
+{
+  "exam_sessions": [
+    {
+      "id": "4HEaJ2Sk4A--tXp8ssfBM4Oz6qLy--5UJOdEyGR0EftSa2g4lrZw",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-08-27",
+      "start_date_in_tc_time_zone": "2026-08-27",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    },
+    {
+      "id": "6BNQkqUs1Q--pUIe5srvK23sxTYv--zTNG38i8UWDR_w-n3z5ylg",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-08-23",
+      "start_date_in_tc_time_zone": "2026-08-23",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    },
+    {
+      "id": "uDS14POyJg--bTVYDWZcQL6upNu7--g0_KgFMdhBFJLAQaIhI0XA",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-08-20",
+      "start_date_in_tc_time_zone": "2026-08-20",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    },
+    {
+      "id": "IulnKgsE0g--geFwZIIaM-TSlaW3--4He2oSdRu_G1Sd7h_ajYVA",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-08-13",
+      "start_date_in_tc_time_zone": "2026-08-13",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    },
+    {
+      "id": "1QtDcEIkpQ--ITfgSviRpo6Pdu99--RFQ_VVT88sWCLKFZgw93WQ",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-08-06",
+      "start_date_in_tc_time_zone": "2026-08-06",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    },
+    {
+      "id": "3hlYC3QTlw--el8wQUUa2YRCwaxx--z-a7DoG0sEMcITKMyfKcBw",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-08-02",
+      "start_date_in_tc_time_zone": "2026-08-02",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    },
+    {
+      "id": "dhfJqdyxsw--tEBZtDu1Hkms7lhi--DLngDzgL7buPJE-p_ZEdLQ",
+      "browser_time_zone_offset": "UTC+00:00",
+      "category": {
+        "id": 1,
+        "arabic_name": "الكهرباء",
+        "english_name": "Electrician",
+        "exam_type": "cbt_and_practical",
+        "published": true
+      },
+      "start_date_in_browser_time_zone": "2026-07-30",
+      "start_date_in_tc_time_zone": "2026-07-30",
+      "status": "scheduled",
+      "test_center": {
+        "city": "Dhaka",
+        "country_code": "+880",
+        "country_id": 78
+      },
+      "time_zone_name": "Asia/Dhaka"
+    }
+  ],
+  "pagination": {
+    "current": 1,
+    "previous": null,
+    "next": null,
+    "per_page": 10000,
+    "pages": 1,
+    "count": 7
+  }
+}

@@ -253,8 +253,23 @@ export default function Home() {
   const [sessions, setSessions] = useState([]);
   const [loadingSessions, setLoadingSessions] = useState(false);
 
+  const [rebookSelected, setRebookSelected] = useState(null);
+  const [rebookLoading, setRebookLoading] = useState(false);
+  const [rebookResult, setRebookResult] = useState(null);
+  const [rebookExamSessionId, setRebookExamSessionId] = useState('');
+  const [rebookLanguage, setRebookLanguage] = useState('en');
+  const [rebookMethodology, setRebookMethodology] = useState(1);
+  const [rebookAvailableSessions, setRebookAvailableSessions] = useState([]);
+  const [rebookLoadingSessions, setRebookLoadingSessions] = useState(false);
+  const [rebookPeekingTime, setRebookPeekingTime] = useState(false);
+  const [rebookPeekedTime, setRebookPeekedTime] = useState('');
+
   const [rescheduleSelected, setRescheduleSelected] = useState(null);
   const [cancelSelected, setCancelSelected] = useState(null);
+
+  // Payload preview state — shows exact JSON before sending to server
+  const [showPayloadPreview, setShowPayloadPreview] = useState(false);
+  const [pendingPayload, setPendingPayload] = useState(null);
 
   const [examResults, setExamResults] = useState(null);
   const [loadingResults, setLoadingResults] = useState(false);
@@ -443,6 +458,95 @@ export default function Home() {
     return () => { cancelled = true; };
   }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCities]);
 
+  useEffect(() => {
+    if (!rescheduleCategory || !rescheduleNewDate) {
+      setRebookAvailableSessions([]);
+      setRebookExamSessionId('');
+      return;
+    }
+    let cancelled = false;
+    async function loadRebookSessions() {
+      setRebookLoadingSessions(true);
+      setRebookAvailableSessions([]);
+      setRebookExamSessionId('');
+      try {
+        const cityObj = rescheduleCity ? rescheduleCities.find(c => c.id === rescheduleCity) : null;
+        const cityName = cityObj ? cityObj.name : undefined;
+        const res = await fetch('/api/takamol/sessions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: rescheduleCategory, date: rescheduleNewDate, city: cityName })
+        });
+        const json = await res.json();
+        if (!cancelled && json.success) {
+          const apiSessions = json.data.sessions || [];
+          const normalizedDate = rescheduleNewDate;
+          const sessionsForDate = apiSessions.map(s => {
+            let time = s.test_time || s.start_time || s.time || s.time_slot || s.start_time_in_tc_time_zone || s.test_time_in_tc_time_zone || s.exam_session?.test_time || s.exam_session?.start_time || '';
+            if (!time) {
+              const dtFields = [s.start_date_in_tc_time_zone, s.start_date_in_browser_time_zone, s.end_date_in_tc_time_zone, s.exam_date_time, s.exam_session?.start_date_in_tc_time_zone];
+              for (const dt of dtFields) {
+                if (dt && String(dt).includes('T')) {
+                  const m = String(dt).match(/T(\d{2}:\d{2})/);
+                  if (m) { time = m[1]; break; }
+                }
+              }
+            }
+            const date = s.test_date || s.date || s.start_date || s.start_date_in_tc_time_zone || s.start_date_in_browser_time_zone || s.exam_session?.test_date || '';
+            const dateMatch = !date || String(date).includes(normalizedDate);
+            return {
+              id: s.id || s.exam_session_id || s.exam_session?.id || s.session_id,
+              date,
+              time,
+              city: s.test_center?.city || s.test_center?.test_center_city || '',
+              centerName: s.test_center?.test_center_name || s.test_center?.name || '',
+              seats: s.available_seats ?? s.seats_available ?? s.slots_available ?? s.capacity ?? null,
+              raw: s,
+              dateMatch
+            };
+          }).filter(s => s.dateMatch && s.id);
+          if (!cancelled) setRebookAvailableSessions(sessionsForDate);
+        }
+      } catch (e) {
+        console.error('[rebook] Failed to load sessions:', e.message);
+      } finally {
+        if (!cancelled) setRebookLoadingSessions(false);
+      }
+    }
+    loadRebookSessions();
+    return () => { cancelled = true; };
+  }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCities]);
+
+  // ─── Auto-peek session time when a session is selected ────────────
+  useEffect(() => {
+    if (!rebookExamSessionId || !rescheduleCategory) { setRebookPeekedTime(''); return; }
+    let cancelled = false;
+    async function peek() {
+      setRebookPeekingTime(true);
+      try {
+        const res = await fetch('/api/exam/peek-time', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            examSessionId: rebookExamSessionId,
+            occupationId: rescheduleCategory,
+            languageCode: rebookLanguage,
+            methodology: rebookMethodology
+          })
+        });
+        const json = await res.json();
+        if (!cancelled && json.success) {
+          setRebookPeekedTime(json.data.testTime);
+        } else if (!cancelled) {
+          console.warn('[peek-time] Failed:', json.error);
+        }
+      } catch (e) {
+        console.warn('[peek-time] Error:', e.message);
+      } finally { if (!cancelled) setRebookPeekingTime(false); }
+    }
+    peek();
+    return () => { cancelled = true; };
+  }, [rebookExamSessionId, rescheduleCategory, rebookLanguage, rebookMethodology]);
+
   const filteredCityDates = useMemo(() => {
     if (!selectedCategory || !selectedCity) return { dates: [], source: 'none' };
     const cityObj = cities.find(c => c.id === selectedCity);
@@ -602,6 +706,11 @@ export default function Home() {
     try {
       const res = await fetch('/api/exam/sessions');
       const json = await res.json();
+      if (json.expired) {
+        setAuthStatus({ loggedIn: false });
+        setError('Session expired. Please login again.');
+        return;
+      }
       if (json.success) setSessions(json.data.sessions);
     } catch {} finally { setLoadingSessions(false); }
   }
@@ -614,6 +723,11 @@ export default function Home() {
       try {
         const res = await fetch('/api/exam/sessions');
         const json = await res.json();
+        if (!cancelled && json.expired) {
+          setAuthStatus({ loggedIn: false });
+          setError('Session expired. Please login again.');
+          return;
+        }
         if (!cancelled && json.success) setSessions(json.data.sessions);
       } catch {} finally { if (!cancelled) setLoadingSessions(false); }
     }
@@ -847,8 +961,9 @@ export default function Home() {
                    const canReschedule = session.can_be_rescheduled !== false && !['completed','passed','cancelled'].includes(status);
                    const canCancel = session.can_be_canceled !== false && !['completed','passed','cancelled'].includes(status);
                    const certId = session.certificate?.id || sid;
-                   const isRescheduling = rescheduleSelected?.id === sid;
-                   const isCancelling = cancelSelected?.id === sid;
+                    const isRescheduling = rescheduleSelected?.id === sid;
+                    const isCancelling = cancelSelected?.id === sid;
+                    const isRebooking = rebookSelected?.id === sid;
 
                    const statusColors = {
                      scheduled: 'bg-blue-500/10 border-blue-500/30 text-blue-400',
@@ -897,11 +1012,40 @@ export default function Home() {
                               className="px-3 py-1.5 bg-amber-600/10 hover:bg-amber-600/20 border border-amber-500/20 text-amber-400 rounded-lg text-xs font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed">
                               Reschedule
                             </button>
-                           <button onClick={() => setCancelSelected(isCancelling ? null : { id: sid, session })} disabled={!canCancel}
-                             className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed">
-                             Cancel
-                           </button>
-                           {session.certificate && (
+                            <button onClick={() => setCancelSelected(isCancelling ? null : { id: sid, session })} disabled={!canCancel}
+                              className="px-3 py-1.5 bg-red-600/10 hover:bg-red-600/20 border border-red-500/20 text-red-400 rounded-lg text-xs font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                              Cancel
+                            </button>
+                            <button onClick={() => {
+                              if (rebookSelected?.id === sid) {
+                                setRebookSelected(null);
+                                setRescheduleCategory('');
+                                setRescheduleCity('');
+                                setRescheduleNewDate('');
+                                return;
+                              }
+                              const sessionName = (session.category?.english_name || session.occupation?.english_name || '').trim();
+                              const sessionId = session.category?.id || session.occupation?.id || session.category_id || session.occupation_id;
+                              let matchedCat = categories.find(c => c.id == sessionId);
+                              if (!matchedCat && sessionName) {
+                                matchedCat = categories.find(c => c.name === sessionName);
+                              }
+                              const catId = matchedCat ? matchedCat.id : sessionId;
+                              setRescheduleSelected(null);
+                              setCancelSelected(null);
+                              setRebookSelected({ id: sid, session });
+                              setRescheduleCategory(String(catId || ''));
+                              setRescheduleCity('');
+                              setRescheduleNewDate('');
+                              setRebookExamSessionId('');
+                              setRebookLanguage('en');
+                              setRebookMethodology(1);
+                              setRebookAvailableSessions([]);
+                            }} disabled={!['cancelled','canceled'].includes(status)}
+                              className="px-3 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                              Reschedule Again
+                            </button>
+                            {session.certificate && (
                              <a href={`/api/exam/certificate/${certId}`} target="_blank" rel="noopener noreferrer"
                                className="px-3 py-1.5 bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-400 rounded-lg text-xs font-medium transition-all">
                                Certificate
@@ -1039,34 +1183,68 @@ export default function Home() {
                               ) : null}
                             </div>
                           )}
-                          <div className="flex gap-2">
-                            <button onClick={() => { setRescheduleSelected(null); setRescheduleNewDate(''); setRescheduleCategory(''); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleCenters([]); setRescheduleAvailableSessions([]); setRescheduleSelectedSessionId(''); setRescheduleSelectedTime(''); }} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 text-xs transition-all">Cancel</button>
-                            <button onClick={async () => {
-                              if (!rescheduleNewDate || !rescheduleCategory) return;
-                              const examSessionId = rescheduleSelectedSessionId;
-                              const selectedSessionData = rescheduleAvailableSessions.find(s => String(s.id) === examSessionId);
-                              console.log('[reschedule] CONFIRM:', { newDate: rescheduleNewDate, examSessionId, selectedTime: rescheduleSelectedTime, sessionData: selectedSessionData ? JSON.stringify(selectedSessionData).substring(0, 500) : 'NOT FOUND' });
-                              if (!examSessionId) { setError('Please select an available session from the list.'); return; }
-                              if (!rescheduleSelectedTime) { setError('Please select a time slot from the dropdown.'); return; }
-                              setRescheduleLoading(true); setError('');
-                              try {
-                                const body = { sessionId: sid, newDate: rescheduleNewDate, categoryId: rescheduleCategory, testCenterId: rescheduleCenter || undefined, examSessionId, time: rescheduleSelectedTime };
-                                console.log('[reschedule] Sending body:', JSON.stringify(body));
-                                const res = await fetch('/api/exam/reschedule', {
-                                  method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                  body: JSON.stringify(body)
-                                });
-                                const json = await res.json();
-                                console.log('[reschedule] Response:', JSON.stringify(json).substring(0, 500));
-                                setRescheduleResult(json);
-                                if (json.success) { setRescheduleSelected(null); setRescheduleNewDate(''); setRescheduleCategory(''); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleCenters([]); setRescheduleAvailableSessions([]); setRescheduleSelectedSessionId(''); setRescheduleSelectedTime(''); handleLoadSessions(); }
-                                else setError(json.error || 'Reschedule failed.');
-                              } catch { setError('Reschedule request failed.'); } finally { setRescheduleLoading(false); }
-                            }} disabled={rescheduleLoading || !rescheduleNewDate || !rescheduleCategory || !rescheduleSelectedSessionId || !rescheduleSelectedTime}
-                              className="flex-[2] py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
-                              {rescheduleLoading ? 'Rescheduling...' : 'Confirm Reschedule'}
-                            </button>
-                          </div>
+                          {showPayloadPreview && pendingPayload && pendingPayload.sessionId === sid ? (
+                            <div className="w-full space-y-3">
+                              <div className="p-3 bg-slate-800 border border-amber-500/30 rounded-xl">
+                                <div className="text-xs font-semibold text-amber-400 uppercase tracking-wider mb-2">Payload Preview — Check before sending</div>
+                                <pre className="text-xs text-slate-300 bg-slate-900/50 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">{JSON.stringify(pendingPayload, null, 2)}</pre>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => { setShowPayloadPreview(false); setPendingPayload(null); }} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 text-xs transition-all">
+                                  Cancel
+                                </button>
+                                <button onClick={async () => {
+                                  setShowPayloadPreview(false);
+                                  setRescheduleLoading(true); setError('');
+                                  try {
+                                    console.log('[reschedule] Sending payload:', JSON.stringify(pendingPayload));
+                                    const res = await fetch('/api/exam/reschedule', {
+                                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify(pendingPayload)
+                                    });
+                                    const json = await res.json();
+                                    console.log('[reschedule] Response:', JSON.stringify(json).substring(0, 500));
+                                    setRescheduleResult(json);
+                                    if (json.success) { setRescheduleSelected(null); setRescheduleNewDate(''); setRescheduleCategory(''); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleCenters([]); setRescheduleAvailableSessions([]); setRescheduleSelectedSessionId(''); setRescheduleSelectedTime(''); handleLoadSessions(); }
+                                    else setError(json.error || 'Reschedule failed.');
+                                  } catch { setError('Reschedule request failed.'); } finally { setRescheduleLoading(false); setPendingPayload(null); }
+                                }} disabled={rescheduleLoading}
+                                  className="flex-[2] py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
+                                  {rescheduleLoading ? 'Rescheduling...' : 'Confirm & Send to SVPI'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <button onClick={() => { setRescheduleSelected(null); setRescheduleNewDate(''); setRescheduleCategory(''); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleCenters([]); setRescheduleAvailableSessions([]); setRescheduleSelectedSessionId(''); setRescheduleSelectedTime(''); }} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 text-xs transition-all">Cancel</button>
+                              <button onClick={() => {
+                                if (!rescheduleNewDate || !rescheduleCategory) return;
+                                const examSessionId = rescheduleSelectedSessionId;
+                                const selectedSessionData = rescheduleAvailableSessions.find(s => String(s.id) === examSessionId);
+                                console.log('[reschedule] Building payload...', { newDate: rescheduleNewDate, examSessionId, selectedTime: rescheduleSelectedTime });
+                                if (!examSessionId) { setError('Please select an available session from the list.'); return; }
+                                // Only require time selection when time slots ARE available from the API
+                                if (rescheduleAvailableTimes.length > 0 && !rescheduleSelectedTime) { setError('Please select a time slot from the dropdown.'); return; }
+                                const body = {
+                                  sessionId: sid,
+                                  newDate: rescheduleNewDate,
+                                  categoryId: rescheduleCategory,
+                                  testCenterId: rescheduleCenter || undefined,
+                                  // 🚨 When center IS selected, do NOT send examSessionId.
+                                  // exam_session_id carries the OLD center's session assignment.
+                                  // Without it, SVPI re-assigns a new session matching the new center.
+                                  examSessionId: rescheduleCenter ? undefined : examSessionId,
+                                  time: rescheduleSelectedTime || undefined
+                                };
+                                console.log('[reschedule] PAYLOAD PREVIEW:', JSON.stringify(body, null, 2));
+                                setPendingPayload(body);
+                                setShowPayloadPreview(true);
+                              }} disabled={!rescheduleNewDate || !rescheduleCategory || !rescheduleSelectedSessionId}
+                                className="flex-[2] py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-slate-700 disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
+                                Review Payload
+                              </button>
+                            </div>
+                          )}
                         </div>
                       )}
                       {isCancelling && (
@@ -1095,9 +1273,209 @@ export default function Home() {
                           </div>
                         </div>
                       )}
+                      {isRebooking && (
+                        <div className="px-5 pb-5 pt-0 border-t border-slate-800 mt-1 pt-4 space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Category</label>
+                            <select value={rescheduleCategory} onChange={(e) => { setRescheduleCategory(e.target.value); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleNewDate(''); setRebookAvailableSessions([]); setRebookExamSessionId(''); }}
+                              className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer">
+                              <option value="">-- Select Category --</option>
+                              {rescheduleCategories.map((cat, idx) => <option key={`${cat.id}-${idx}`} value={cat.id}>{cat.name}</option>)}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                              City {rescheduleLoadingCities && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
+                            </label>
+                            <select value={rescheduleCity} onChange={(e) => { setRescheduleCity(e.target.value); setRescheduleCenter(''); setRescheduleNewDate(''); setRebookAvailableSessions([]); setRebookExamSessionId(''); }} disabled={!rescheduleCategory || rescheduleLoadingCities}
+                              className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
+                              <option value="">{!rescheduleCategory ? 'Select category first' : rescheduleLoadingCities ? 'Loading cities...' : '-- Select City --'}</option>
+                              {rescheduleCities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
+                            </select>
+                          </div>
+                          {rescheduleCity && rescheduleCenters.length > 0 && (
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                                Test Center {rescheduleLoadingCenters && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
+                              </label>
+                              <select value={rescheduleCenter} onChange={(e) => { setRescheduleCenter(e.target.value); setRebookExamSessionId(''); }} disabled={rescheduleLoadingCenters}
+                                className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
+                                <option value="">{rescheduleLoadingCenters ? 'Loading centers...' : '-- Select Center --'}</option>
+                                {rescheduleCenters.map((c) => <option key={c.id} value={c.id}>{c.name}{c.city ? ` - ${c.city}` : ''}</option>)}
+                              </select>
+                            </div>
+                          )}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Exam Date</label>
+                            <Calendar value={rescheduleNewDate} onChange={(v) => { setRescheduleNewDate(v); setRebookExamSessionId(''); }} minDate={minDate} availableDates={rescheduleEffectiveAvailableDates} loading={rescheduleLoadingDates} source={rescheduleEffectiveDateSource} />
+                          </div>
+                          {rescheduleNewDate && (
+                            <div>
+                              <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">
+                                Available Session {rebookLoadingSessions && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
+                              </label>
+                              {rebookLoadingSessions ? (
+                                <div className="flex items-center gap-2 text-xs text-slate-500 py-2">
+                                  <div className="w-3 h-3 border-[1.5px] border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+                                  Fetching available sessions...
+                                </div>
+                              ) : (() => {
+                                const selectedCenter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
+                                const centerCityLower = selectedCenter ? selectedCenter.city.toLowerCase() : '';
+                                const filteredSessions = rebookAvailableSessions.filter(s => {
+                                  if (!centerCityLower) return true;
+                                  return (s.city || '').toLowerCase() === centerCityLower;
+                                });
+                                const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
+                                if (filteredSessions.length > 0) {
+                                  return (
+                                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                      {filteredSessions.map((s, idx) => {
+                                        const sessionId = s.id || idx;
+                                        const isSelected = rebookExamSessionId === String(sessionId);
+                                        const time = (isSelected && rebookPeekedTime) ? rebookPeekedTime : (s.time || '');
+                                        const centerName = s.centerName || '';
+                                        const centerCity = s.city || '';
+                                        const slots = s.seats ?? '';
+                                        return (
+                                          <button key={sessionId || idx} type="button" onClick={() => { setRebookExamSessionId(isSelected ? '' : String(sessionId)); setRebookPeekedTime(''); }}
+                                            className={`w-full text-left p-3 rounded-xl border transition-all ${isSelected ? 'bg-emerald-600/20 border-emerald-500/50 ring-1 ring-emerald-500/30' : 'bg-slate-800/60 border-slate-700/50 hover:border-slate-600 hover:bg-slate-800'}`}>
+                                            <div className="flex items-center justify-between">
+                                              <div className="min-w-0">
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                  {time && <span className="text-sm font-medium text-white">{time}</span>}
+                                                  {!time && isSelected && rebookPeekingTime && <span className="text-sm font-medium text-emerald-400 flex items-center gap-1"><div className="w-3 h-3 border-[1.5px] border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />Peeking time...</span>}
+                                                  {!time && !(isSelected && rebookPeekingTime) && <span className="text-sm font-medium text-slate-400">Session #{idx + 1}</span>}
+                                                </div>
+                                                {(centerName || centerCity) && <div className="text-xs text-slate-500 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
+                                              </div>
+                                              <div className="flex items-center gap-2 shrink-0">
+                                                {slots !== '' && slots !== null && <span className="text-[10px] text-slate-500">{slots} seats</span>}
+                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-emerald-400 bg-emerald-400' : 'border-slate-600'}`}>
+                                                  {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </button>
+                                        );
+                                      })}
+                                    </div>
+                                  );
+                                } else {
+                                  return (
+                                    <div className="text-xs text-slate-500 py-2">
+                                      {selectedCenter
+                                        ? `No sessions found for ${selectedCenter.name} on this date. Try a different date.`
+                                        : 'No sessions found for this date. Try a different date or city.'}
+                                    </div>
+                                  );
+                                }
+                              })()}
+                            </div>
+                          )}
+                          <div>
+                            <label className="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wider">Language</label>
+                            <select value={rebookLanguage} onChange={(e) => setRebookLanguage(e.target.value)}
+                              className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all appearance-none cursor-pointer">
+                              <option value="en">English</option>
+                              <option value="ar">Arabic</option>
+                              <option value="bn">Bangla</option>
+                              <option value="id">Indonesian</option>
+                              <option value="ta">Tamil</option>
+                              <option value="si">Sinhala</option>
+                            </select>
+                          </div>
+                          {showPayloadPreview && pendingPayload && pendingPayload._rebook ? (
+                            <div className="w-full space-y-3">
+                              <div className="p-3 bg-slate-800 border border-emerald-500/30 rounded-xl">
+                                <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Payload Preview — Exact data sent to SVPI</div>
+                                <pre className="text-xs text-slate-300 bg-slate-900/50 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">{JSON.stringify(pendingPayload, null, 2)}</pre>
+                              </div>
+                              <div className="flex gap-2">
+                                <button onClick={() => { setShowPayloadPreview(false); setPendingPayload(null); }} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 text-xs transition-all">Cancel</button>
+                                <button onClick={async () => {
+                                  setShowPayloadPreview(false);
+                                  setRebookLoading(true); setError('');
+                                  try {
+                                    const res = await fetch('/api/exam/rebook', {
+                                      method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                      body: JSON.stringify(pendingPayload)
+                                    });
+                                    const json = await res.json();
+                                    setRebookResult(json);
+                                    if (json.success) { setRebookSelected(null); setRescheduleNewDate(''); setRescheduleCategory(''); setRescheduleCity(''); setRescheduleCenter(''); setRebookExamSessionId(''); setRebookAvailableSessions([]); handleLoadSessions(); }
+                                    else setError(json.error || 'Rebook failed.');
+                                  } catch { setError('Rebook request failed.'); } finally { setRebookLoading(false); setPendingPayload(null); }
+                                }} disabled={rebookLoading}
+                                  className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
+                                  {rebookLoading ? 'Rebooking...' : 'Confirm & Send to SVPI'}
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="flex gap-2">
+                              <button onClick={() => { setRebookSelected(null); setRescheduleCategory(''); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleNewDate(''); setRebookExamSessionId(''); setRebookAvailableSessions([]); }} className="flex-1 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-slate-400 text-xs transition-all">Cancel</button>
+                              <button onClick={() => {
+                                if (!rescheduleNewDate || !rescheduleCategory || !rescheduleCity) { setError('Please select category, city, and date.'); return; }
+                                if (!rebookExamSessionId) { setError('Please select an available exam session.'); return; }
+                                if (!rescheduleCenter) { setError('Please select a test center.'); return; }
+                                const cityObj = rescheduleCities.find(c => c.id === rescheduleCity);
+                                const cityName = cityObj ? cityObj.name : '';
+                                if (!cityName) { setError('City name not found.'); return; }
+                                const selectedCenter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
+                                const centerName = selectedCenter ? selectedCenter.name : '';
+                                const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
+                                const body = {
+                                  categoryId: rescheduleCategory,
+                                  examSessionId: rebookExamSessionId,
+                                  languageCode: rebookLanguage,
+                                  methodology: rebookMethodology,
+                                  newDate: rescheduleNewDate,
+                                  cityName,
+                                  testCenter: centerName,
+                                  sessionTime: rebookPeekedTime || selectedSessionData?.time || ''
+                                };
+                                setPendingPayload({ ...body, _rebook: true });
+                                setShowPayloadPreview(true);
+                              }} disabled={!rescheduleNewDate || !rescheduleCategory || !rescheduleCity || !rebookExamSessionId || !rescheduleCenter}
+                                className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
+                                Review Payload
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
+              </div>
+            )}
+            {rebookResult && (
+              <div className={`p-4 rounded-xl border ${rebookResult.success ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-red-500/10 border-red-500/30'}`}>
+                {rebookResult.success ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-emerald-400 text-sm font-semibold">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                      Exam rebooked successfully!
+                    </div>
+                    {rebookResult.data?.center && (
+                      <div className="mt-2 space-y-1 text-xs">
+                        <div className="text-slate-400"><span className="text-slate-500">Center:</span> <span className="text-white">{rebookResult.data.center.name}</span></div>
+                        {rebookResult.data.center.city && <div className="text-slate-400"><span className="text-slate-500">City:</span> <span className="text-white">{rebookResult.data.center.city}</span></div>}
+                        {rebookResult.data.center.address && <div className="text-slate-400"><span className="text-slate-500">Address:</span> <span className="text-white">{rebookResult.data.center.address}</span></div>}
+                      </div>
+                    )}
+                    {rebookResult.data?.testDate && (
+                      <div className="text-xs text-slate-400"><span className="text-slate-500">New Date:</span> <span className="text-white">{rebookResult.data.testDate}{rebookResult.data.testTime ? ` at ${rebookResult.data.testTime}` : ''}</span></div>
+                    )}
+                    {rebookResult.data?.status && (
+                      <div className="text-xs text-slate-400"><span className="text-slate-500">Status:</span> <span className="text-emerald-400 capitalize">{rebookResult.data.status}</span></div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-red-400 text-sm">{rebookResult.error || 'Rebook failed.'}</span>
+                )}
+                <button onClick={() => setRebookResult(null)} className="mt-2 text-xs underline opacity-70 text-slate-400">dismiss</button>
               </div>
             )}
             {rescheduleResult && (

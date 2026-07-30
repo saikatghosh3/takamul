@@ -1,0 +1,20 @@
+{
+  "id": "BZGmaeKzNg--DD_N-zZgx1A831LM--GIs0Kv6EQnq6zUFNsX5onQ",
+  "browser_time_zone_offset": "UTC+00:00",
+  "category": {
+    "id": 1,
+    "arabic_name": "الكهرباء",
+    "english_name": "Electrician",
+    "exam_type": "cbt_and_practical",
+    "published": true
+  },
+  "start_date_in_browser_time_zone": "2026-08-27",
+  "start_date_in_tc_time_zone": "2026-08-27",
+  "status": "scheduled",
+  "test_center": {
+    "city": "Dhaka",
+    "country_code": "+880",
+    "country_id": 78
+  },
+  "time_zone_name": "Asia/Dhaka"
+}

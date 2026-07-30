@@ -1,0 +1,62 @@
+{
+  "timestamp": "2026-07-29T23:40:17.546Z",
+  "totalApiCalls": 9,
+  "timeInfoFound": 0,
+  "timeResponses": [],
+  "allApiCalls": [
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://svp-international-api.pacc.sa/api/v1/flipper/feature_flags?locale=en",
+      "bodyLength": 5148
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://svp-international-api.pacc.sa/api/v1/visitor_space/named_content_page/landing_page?locale=en",
+      "bodyLength": 698
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://svp-international-api.pacc.sa/api/v1/visitor_space/countries?per_page=250&locale=en",
+      "bodyLength": 0
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://svp-international-api.pacc.sa/api/v1/flipper/feature_flags?locale=en",
+      "bodyLength": 5148
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://svp-international-api.pacc.sa/api/v1/visitor_space/named_content_page/landing_page?locale=en",
+      "bodyLength": 698
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://care.svp-international.pacc.sa/api/sn_csm_ec/engagement_center_api/modules/ce5c3fbce929aa10460ac8963f675c02",
+      "bodyLength": 1000
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://svp-international-api.pacc.sa/api/v1/visitor_space/countries?per_page=250&locale=en",
+      "bodyLength": 25752
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://care.svp-international.pacc.sa/api/now/sp/page?id=em_dummy_page&context_load=true&se_modal=false&time=1785368410341&portal_id=465cb3fce929aa10460ac8963f675cbc&request_uri=%2Fce5c3fbce929aa10460ac8963f675c02%3Fid%3Dem_dummy_page%26context_load%3Dtrue%26se_modal%3Dfalse",
+      "bodyLength": 136924
+    },
+    {
+      "method": "GET",
+      "status": 200,
+      "url": "https://care.svp-international.pacc.sa/api/sn_csm_ec/conversation_active_user_em",
+      "bodyLength": 51
+    }
+  ]
+}

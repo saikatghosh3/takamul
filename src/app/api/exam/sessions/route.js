@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { isLoggedIn, authenticatedFetch } from '@/lib/svp-playwright';
+import { isLoggedIn, authenticatedFetch, logout } from '@/lib/svp-playwright';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,6 +26,13 @@ export async function GET(request) {
     );
 
     if (!res.ok) {
+      if (res.status === 401) {
+        logout();
+        return NextResponse.json(
+          { success: false, error: 'Session expired. Please login again.', expired: true },
+          { status: 401 }
+        );
+      }
       return NextResponse.json(
         { success: false, error: `Failed to fetch bookings (${res.status})` },
         { status: res.status }
