@@ -1,0 +1,622 @@
+[
+  {
+    "id": "sIQS-jFySA--KeOBLoQxhLrOuLAv--b5mnkG_R0_jhlEmV5VTTUw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-10-26",
+    "start_date_in_tc_time_zone": "2026-10-26",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "pjh3AIZfLg--a4HD5ZZ_11ooznM---ETrdQxHzD73EijBAO3IS9g",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-10-19",
+    "start_date_in_tc_time_zone": "2026-10-19",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "FTe_eOuIvw--3lEFtzqk7vOqItph--E4yLGGp3WP4PIlgcIJejew",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-10-12",
+    "start_date_in_tc_time_zone": "2026-10-12",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "d999PAr2Vw--VLUAxcmrm7BbwcX9--peRDjFyrdBTPC-bHY6c4Sw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-10-05",
+    "start_date_in_tc_time_zone": "2026-10-05",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "riM31JR8ww--l0Xwgj6I2ImHHLx4--hLv6KbSAPCR2vVZkEk3AKQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-09-28",
+    "start_date_in_tc_time_zone": "2026-09-28",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "s3I1WK8VUg--TxvNhxg_adsekJW9--IXbcvrCEKtSGe4SQyIwugA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-09-21",
+    "start_date_in_tc_time_zone": "2026-09-21",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "YhMZtlSrpQ--bLRwpK2JgqSeCjm---yz-x_OKMCq3mSxmlZAg4yw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-09-14",
+    "start_date_in_tc_time_zone": "2026-09-14",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "jDcvLH_31g--4UCXY_YgVh5j7Zo9--AKOI5AW4E0PoJq_ptV9s2Q",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-09-07",
+    "start_date_in_tc_time_zone": "2026-09-07",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "S-N8f3ZuIg--t4HCD_CQC6vU82wR---Z6dIK-5EsURometvlF0wg",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-31",
+    "start_date_in_tc_time_zone": "2026-08-31",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "7tzmxH-vZg--SHsz9AhiPKASH-wd--ZHDEO7eXNUlDgAj94qwKKg",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-31",
+    "start_date_in_tc_time_zone": "2026-08-31",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "wxZzK5WOTw--yMm417uQmYV0ZWyH--CluXZ3hqtIOmallu65M9TQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-30",
+    "start_date_in_tc_time_zone": "2026-08-30",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "x2dpL678wg--cckHV4A__Jr5etsD--1QMWE5o57t2WE6yT7J3pOA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-27",
+    "start_date_in_tc_time_zone": "2026-08-27",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Dhaka",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "43vy8OLflA--LFZakCa2m8z8Bxp3--3IjGcvPJ7PjJ3Vh-9ULu6w",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-24",
+    "start_date_in_tc_time_zone": "2026-08-24",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "Y6Zvqqn_oA--CPAdC0sElhuSV9yH--BjprrkiP6wUOSxx2u8jtNA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-24",
+    "start_date_in_tc_time_zone": "2026-08-24",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "EXk-h1m2nQ--Qq66kts_XQjNiY4u--5kpqw-EbGgxKZFHY9x21EA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-23",
+    "start_date_in_tc_time_zone": "2026-08-23",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Dhaka",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "2m4zKQrOgA--2Rvq7su-dAReTbGA--QnZtv6bFm8kEhSOdI-B-cA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-23",
+    "start_date_in_tc_time_zone": "2026-08-23",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "l6r9k1T7iQ--UE0Eyd1UOp4k0rmB--7_INta1dYeHeOFKW7KZ5Og",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-20",
+    "start_date_in_tc_time_zone": "2026-08-20",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Dhaka",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "sJvDxfLc0Q--z9CQK9zP7NVyCUcW--Ld2k5dHpAB5m2Y-zk78Q1A",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-19",
+    "start_date_in_tc_time_zone": "2026-08-19",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Sylhet",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "qyLzKauUXQ--fqRFk6AClcRrno3f--WvzzTWqkHCk5Ua5mPs4CoA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-17",
+    "start_date_in_tc_time_zone": "2026-08-17",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "xDDGk7Ps9A--9z1QcomahrAh397K--vuUtp8OvUJRTA_FZgRV1MA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-17",
+    "start_date_in_tc_time_zone": "2026-08-17",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "4a272jAB7Q--XNIDEw0agRHaEnep--sGDcqDeb2Adcq7e6pMJQjQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-16",
+    "start_date_in_tc_time_zone": "2026-08-16",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "SyH2dsJYlQ--08WmOab2h-6R-b93--8v8x15uEh8PvZFUYoFNUlw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-13",
+    "start_date_in_tc_time_zone": "2026-08-13",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Dhaka",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "78qikZi3Qg--QsvldvratIZcQNGA--K7VXZWTsDWRk0i7t0AoH3A",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-10",
+    "start_date_in_tc_time_zone": "2026-08-10",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "XmyARHruOA--PlYa7DlyumIFtF3l--rRafFdEpOFlQ8EixWafuoA",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-10",
+    "start_date_in_tc_time_zone": "2026-08-10",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Cumilla",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "mzCfVqa58Q--Rn7bSNYl7Za1IfTJ--4aqmLXmR6NHU7F0BUWTlNQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-10",
+    "start_date_in_tc_time_zone": "2026-08-10",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "cU6dkTRXdA--jzOjJXEv2Zt1Ha5p--WO9nC-5umZ2Pwg6oSkQugw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-09",
+    "start_date_in_tc_time_zone": "2026-08-09",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "jf2qvVJn9A--1QEgnQ56mgFX4mAS--fgGK8ILIET0Rn3ewHTQbEQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-06",
+    "start_date_in_tc_time_zone": "2026-08-06",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Dhaka",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "qOUs_6M9Hg--m9EQ8edWoi7-UU2v--DtjTPH2R_DdTwvH3nTsJSQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-03",
+    "start_date_in_tc_time_zone": "2026-08-03",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "KTOU9GspvA--Y0_NlGHp8KqUGcIL--C-TJDeLNjplu6H_Grr0Xnw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-03",
+    "start_date_in_tc_time_zone": "2026-08-03",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Barishal",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "-YfgddpAWA--7IKFhbpT_fiDRUnT--FREaHqQRSBwAZX2moC8jWQ",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-02",
+    "start_date_in_tc_time_zone": "2026-08-02",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Dhaka",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  },
+  {
+    "id": "A7P6Bw3N3A--8f22W-iEgbA-WRZc---X0CdsOCHKXQEb_PC71Uxw",
+    "browser_time_zone_offset": "UTC+00:00",
+    "category": {
+      "id": 1,
+      "arabic_name": "الكهرباء",
+      "english_name": "Electrician",
+      "exam_type": "cbt_and_practical",
+      "published": true
+    },
+    "start_date_in_browser_time_zone": "2026-08-02",
+    "start_date_in_tc_time_zone": "2026-08-02",
+    "status": "scheduled",
+    "test_center": {
+      "city": "Khulna",
+      "country_code": "+880",
+      "country_id": 78
+    },
+    "time_zone_name": "Asia/Dhaka"
+  }
+]

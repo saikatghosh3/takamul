@@ -137,11 +137,11 @@ export async function fetchTestCenters(categoryId, city) {
   return centers;
 }
 
-export async function fetchExamSessions(categoryId, testDate, city) {
+export async function fetchExamSessions(categoryId, testDate, city, testCenterId) {
   const token = getToken();
   if (!token) throw new Error('Not authenticated. Please login first.');
 
-  const cacheKey = `sessions:${categoryId}:${testDate || ''}:${city || ''}`;
+  const cacheKey = `sessions:${categoryId}:${testDate || ''}:${city || ''}:${testCenterId || ''}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -152,11 +152,22 @@ export async function fetchExamSessions(categoryId, testDate, city) {
   });
   if (testDate) params.set('date', testDate);
   if (city) params.set('city', city);
+  if (testCenterId) params.set('test_center_id', String(testCenterId));
 
   const url = `${API_BASE}/individual_labor_space/exam_sessions?${params.toString()}`;
 
   console.log(`[takamol] fetchExamSessions: ${url}`);
-  const res = await fetch(url, { headers: authHeaders() });
+  let res = await fetch(url, { headers: authHeaders() });
+
+  // If the endpoint does not support the test_center_id filter, retry without
+  // it so the session list still loads (client-side city filtering still applies).
+  if (!res.ok && testCenterId) {
+    params.delete('test_center_id');
+    const fallbackUrl = `${API_BASE}/individual_labor_space/exam_sessions?${params.toString()}`;
+    console.log(`[takamol] fetchExamSessions test_center_id filter failed (${res.status}), retrying without: ${fallbackUrl}`);
+    res = await fetch(fallbackUrl, { headers: authHeaders() });
+  }
+
   if (!res.ok) throw new Error(`Failed to fetch exam sessions: ${res.status}`);
   const data = await res.json();
 

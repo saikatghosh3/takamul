@@ -12,7 +12,7 @@ export async function POST(request) {
       );
     }
 
-    const { sessionId, newDate, categoryId, testCenterId, examSessionId } = await request.json();
+    const { sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language } = await request.json();
 
     if (!sessionId) {
       return NextResponse.json(
@@ -37,10 +37,12 @@ export async function POST(request) {
     console.log(`║  categoryId:    ${categoryId || '(none)'}`);
     console.log(`║  testCenterId:  ${testCenterId || '(none)'}`);
     console.log(`║  examSessionId: ${examSessionId || '(none)'}`);
+    console.log(`║  cityName:      ${cityName || '(none)'}`);
+    console.log(`║  language:      ${language || '(none)'}`);
     console.log('╚═══════════════════════════════════════════════════════════');
     console.log('');
 
-    const result = await rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId);
+    const result = await rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language);
 
     console.log(`[exam/reschedule] Raw result: ${JSON.stringify(result).substring(0, 1000)}`);
 
@@ -55,10 +57,10 @@ export async function POST(request) {
           testDate: reservation.exam_session?.test_date,
           testTime: reservation.exam_session?.test_time,
           center: reservation.test_center ? {
-            id: reservation.test_center.id,
-            name: reservation.test_center.test_center_name,
-            city: reservation.test_center.test_center_city,
-            address: reservation.test_center.test_center_address
+            id: reservation.test_center.id || reservation.test_center.test_center_id,
+            name: reservation.test_center.test_center_name || reservation.test_center.name,
+            city: reservation.test_center.test_center_city || reservation.test_center.city,
+            address: reservation.test_center.test_center_address || reservation.test_center.address
           } : null
         } : result.data)
       };

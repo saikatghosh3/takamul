@@ -5,13 +5,13 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   try {
-    const { category, date, city } = await request.json();
+    const { category, date, city, testCenterId } = await request.json();
 
     if (!category) {
       return NextResponse.json({ success: false, error: 'category is required' }, { status: 400 });
     }
 
-    const result = await fetchExamSessions(category, date, city);
+    const result = await fetchExamSessions(category, date, city, testCenterId);
 
     return NextResponse.json({
       success: true,

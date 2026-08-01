@@ -1,0 +1,134 @@
+[
+  {
+    "id": 166,
+    "address": "Brahmankanda, Faridpur Sadar, Faridpur ",
+    "city": "Barishal",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Faridpur Technical Training Centre"
+  },
+  {
+    "id": 156,
+    "address": "Telegati, Khulna",
+    "city": "Khulna",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Khulna Technical Training Centre"
+  },
+  {
+    "id": 107,
+    "address": "Nishindara Bogura",
+    "city": "Rajshahi",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Bogura Technical Training Centre"
+  },
+  {
+    "id": 102,
+    "address": "Nagor Jalfai, Tangail",
+    "city": "Dhaka",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Tangail Technical Training Center"
+  },
+  {
+    "id": 71,
+    "address": "AlompurKadomtolyMoglabazarSylhet",
+    "city": "Sylhet",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Sylhet Technical Training Center"
+  },
+  {
+    "id": 68,
+    "address": "Khukhapara Rail Gunti Nilphamari Sadar Nilphamari-5300",
+    "city": "Nilphamari",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Nilphamari Technical Training Center"
+  },
+  {
+    "id": 62,
+    "address": "Kotbari, Cumilla",
+    "city": "Cumilla",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Cumilla Technical Training Centre"
+  },
+  {
+    "id": 60,
+    "address": "C & B Road Barishal",
+    "city": "Barishal",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Barishal Technical Training Center"
+  },
+  {
+    "id": 54,
+    "address": "Sopura,Rajshahi",
+    "city": "Rajshahi",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Rajshahi Technical Training Centre"
+  },
+  {
+    "id": 53,
+    "address": "Nasirabad-4209",
+    "city": "Chattogram",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Bangladesh Korea TTC Chattogram"
+  },
+  {
+    "id": 45,
+    "address": "Mirpur -2, Dhaka 1216, Bangladesh",
+    "city": "Dhaka",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Bangladesh German TTC"
+  },
+  {
+    "id": 17,
+    "address": "Q9J2+8X8, Mirpur Rd, Dhaka, Bangladesh",
+    "city": "Dhaka",
+    "country": {
+      "id": 78,
+      "arabic_name": "بنجلاديش",
+      "english_name": "Bangladesh"
+    },
+    "name": "Bangladesh Korea TTC Dhaka"
+  }
+]

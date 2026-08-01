@@ -377,7 +377,7 @@ export async function browserFetch(url, options = {}) {
 
 // ─── RESCHEDULE VIA BROWSER FETCH (enables page.route interception) ──
 
-export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId) {
+export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language) {
   const token = getAuthToken();
   if (!token) throw new Error('Not authenticated. Please login first.');
 
@@ -389,23 +389,36 @@ export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCente
 
     if (testCenterId) {
       // ─── NEW CENTER SPECIFIED ─────────────────────────────────
-      // Use test_date + test_center_id to force the backend to re-assign.
-      // Do NOT include exam_session_id — it carries the old center assignment
-      // and would override the new test_center_id.
+      // The user picked a specific center. Send:
+      //  - test_center_id: their explicit center choice (valid center id)
+      //  - exam_session_id: the exact session they picked from the
+      //    center-filtered list — this is authoritative and pins the
+      //    session's center so SVPI cannot auto-assign another one
+      //  - city + language: the fields SVPI's own reschedule wizard sends,
+      //    required for the backend to place the new booking
       body = {
         test_date: newDate,
         test_center_id: Number(testCenterId) || testCenterId,
         category_id: Number(categoryId) || categoryId
       };
+      if (examSessionId) {
+        body.exam_session_id = Number(examSessionId) || examSessionId;
+      }
+      if (cityName) body.city = cityName;
+      if (language) body.language = language;
     } else if (examSessionId) {
       // ─── ONLY DATE CHANGE (same center) ───────────────────────
       body = { exam_session_id: Number(examSessionId) || examSessionId };
       if (categoryId) body.category_id = Number(categoryId) || categoryId;
       if (newDate) body.test_date = newDate;
+      if (cityName) body.city = cityName;
+      if (language) body.language = language;
     } else if (newDate) {
       // ─── DATE ONLY (fallback) ─────────────────────────────────
       body = { test_date: newDate };
       if (categoryId) body.category_id = Number(categoryId) || categoryId;
+      if (cityName) body.city = cityName;
+      if (language) body.language = language;
     } else {
       return { ok: false, error: 'No valid parameters provided' };
     }
@@ -430,8 +443,8 @@ export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCente
   }
 }
 
-export async function rescheduleViaPlaywright(sessionId, newDate, categoryId, testCenterId, examSessionId) {
-  return rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId);
+export async function rescheduleViaPlaywright(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language) {
+  return rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language);
 }
 
 // ─── REBOOK VIA BROWSER FETCH (creates new reservation after cancellation) ──
