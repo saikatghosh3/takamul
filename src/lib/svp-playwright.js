@@ -12,7 +12,7 @@
  */
 
 import { chromium } from 'playwright';
-import { writeFileSync } from 'fs';
+import { writeFileSync, readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 import { getToken as getAuthToken, isLoggedIn as checkLoggedIn, logout as doLogout } from './svp-auth.js';
 
@@ -23,8 +23,14 @@ const SVP_LOGIN_URL = `${SVP_BASE}/auth/login?role=labor`;
 const SVP_API_BASE = 'https://svp-international-api.pacc.sa/api/v1';
 
 const TOKEN_FILE = join(process.cwd(), '.svp-token.json');
+const STORAGE_FILE = join(process.cwd(), '.svp-storage.json');
 
 // ─── Browser Session Management ─────────────────────────────────
+
+// On Windows, Smart App Control blocks Playwright's unsigned bundled Chromium,
+// so launch via the signed Microsoft Edge instead. Other platforms (e.g. a Linux
+// VPS) keep using Playwright's bundled Chromium, which works fine there.
+const BROWSER_LAUNCH_OPTS = process.platform === 'win32' ? { channel: 'msedge' } : {};
 
 let managedBrowser = null;
 let managedContext = null;
@@ -61,6 +67,7 @@ async function ensureManagedBrowser() {
   if (!token) throw new Error('Not authenticated');
 
   managedBrowser = await chromium.launch({
+    ...BROWSER_LAUNCH_OPTS,
     headless: true,
     args: [
       '--no-sandbox',
@@ -70,23 +77,42 @@ async function ensureManagedBrowser() {
     ]
   });
 
+  // Reuse the SPA session captured at login (cookies incl. the HTTP-only
+  // refresh cookie + localStorage tokens) so the managed context can keep the
+  // session alive and refresh the access token itself. Without the cookies the
+  // stored access token gets rejected once SVP rotates it server-side.
+  let storageState = null;
+  try {
+    if (existsSync(STORAGE_FILE)) {
+      storageState = JSON.parse(readFileSync(STORAGE_FILE, 'utf-8'));
+    }
+  } catch (err) {
+    console.warn('[svp-playwright] Failed to load storage state:', err.message);
+  }
+  const hasStorageState = !!(storageState &&
+    ((storageState.cookies && storageState.cookies.length > 0) ||
+     (storageState.origins && storageState.origins.length > 0)));
+
   managedContext = await managedBrowser.newContext({
     userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    viewport: { width: 1280, height: 800 }
+    viewport: { width: 1280, height: 800 },
+    ...(hasStorageState ? { storageState } : {})
   });
 
-  // Inject token before any page loads
-  await managedContext.addInitScript((t) => {
-    Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
-    delete navigator.__proto__.webdriver;
-    try {
-      localStorage.setItem('auth_token', t);
-      localStorage.setItem('token', t);
-      localStorage.setItem('access_token', t);
-      localStorage.setItem('vue-auth.token', t);
-      localStorage.setItem('svp_token', t);
-    } catch {}
-  }, token);
+  if (!hasStorageState) {
+    // Fallback: no captured session — inject just the access token.
+    await managedContext.addInitScript((t) => {
+      Object.defineProperty(navigator, 'webdriver', { get: () => undefined });
+      delete navigator.__proto__.webdriver;
+      try {
+        localStorage.setItem('auth_token', t);
+        localStorage.setItem('token', t);
+        localStorage.setItem('access_token', t);
+        localStorage.setItem('vue-auth.token', t);
+        localStorage.setItem('svp_token', t);
+      } catch {}
+    }, token);
+  }
 
   managedPage = await managedContext.newPage();
 
@@ -170,6 +196,7 @@ async function doLogin() {
   let browser = null;
   try {
     browser = await chromium.launch({
+      ...BROWSER_LAUNCH_OPTS,
       headless: false,
       args: [
         '--no-sandbox',
@@ -227,7 +254,8 @@ async function doLogin() {
       try {
         if (capturedNetworkToken) {
           storeToken(capturedNetworkToken);
-          await page.goto(`${SVP_BASE}/home`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+          await saveStorageState(context);
+          await browser.close().catch(() => {});
           return { success: true, message: 'Login successful.' };
         }
 
@@ -243,7 +271,8 @@ async function doLogin() {
         const found = extractToken(storageToken);
         if (found) {
           storeToken(found);
-          await page.goto(`${SVP_BASE}/home`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+          await saveStorageState(context);
+          await browser.close().catch(() => {});
           return { success: true, message: 'Login successful.' };
         }
 
@@ -265,7 +294,8 @@ async function doLogin() {
           const retryFound = extractToken(retryToken);
           if (retryFound || capturedNetworkToken) {
             storeToken(retryFound || capturedNetworkToken);
-            await page.goto(`${SVP_BASE}/home`, { waitUntil: 'domcontentloaded', timeout: 30000 }).catch(() => {});
+            await saveStorageState(context);
+            await browser.close().catch(() => {});
             return { success: true, message: 'Login successful.' };
           }
         }
@@ -299,6 +329,20 @@ function storeToken(token) {
   }
 }
 
+// Persist the full SPA session (cookies incl. the HTTP-only refresh cookie +
+// localStorage) so later browser-context API calls can keep the session alive
+// and refresh the access token. Also stop the SPA from rotating the token:
+// the login browser is closed right after this is saved.
+async function saveStorageState(context) {
+  try {
+    const state = await context.storageState();
+    writeFileSync(STORAGE_FILE, JSON.stringify(state), 'utf-8');
+    console.log('[Login] Saved SPA session state to .svp-storage.json');
+  } catch (err) {
+    console.warn('[Login] Could not save storage state:', err.message);
+  }
+}
+
 function extractToken(storage) {
   for (const key of ['auth_token', 'token', 'access_token', 'vue-auth.token', 'vue_auth_token', 'svp_token']) {
     if (storage[key]) return storage[key];
@@ -318,22 +362,110 @@ function extractToken(storage) {
 
 export async function authenticatedFetch(url, options = {}) {
   const token = getAuthToken();
-  const method = (options.method || 'GET').toUpperCase();
-  const headers = {
-    'Accept': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Origin': SVP_BASE,
-    'Referer': `${SVP_BASE}/`,
-    ...options.headers
-  };
-  if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
-    if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+  if (!token) {
+    return {
+      ok: false,
+      status: 401,
+      json: async () => ({ error: 'Not authenticated' })
+    };
   }
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  return fetch(url, { ...options, headers });
+
+  // Route through the managed browser context so the access token can be
+  // refreshed automatically when SVP rotates it server-side.
+  try {
+    const result = await browserFetch(url, options);
+    return {
+      ok: result.ok,
+      status: result.status,
+      json: async () => result.data
+    };
+  } catch (err) {
+    console.warn('[svp-playwright] authenticatedFetch fell back to direct fetch:', err.message);
+    const method = (options.method || 'GET').toUpperCase();
+    const headers = {
+      'Accept': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'Origin': SVP_BASE,
+      'Referer': `${SVP_BASE}/`,
+      ...options.headers
+    };
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+      if (!headers['Content-Type']) headers['Content-Type'] = 'application/json';
+    }
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    const res = await fetch(url, { ...options, headers });
+    return {
+      ok: res.ok,
+      status: res.status,
+      json: async () => res.json()
+    };
+  }
 }
 
 // ─── Browser Fetch (via page context) ───────────────────────────
+
+// Reads the current access token the SPA actually uses (it keeps refreshing it
+// in localStorage as long as its session cookies are valid).
+async function getLiveTokenFromPage(page) {
+  try {
+    const tokens = await page.evaluate(() => {
+      const out = [];
+      for (const key of ['auth_token', 'token', 'access_token', 'vue-auth.token', 'svp_token', 'auth._token.local']) {
+        const v = localStorage.getItem(key);
+        if (v && v.split('.').length === 3) out.push(v);
+      }
+      return out;
+    });
+    return tokens.find((t) => t && !t.startsWith('Bearer ')) || tokens[0] || null;
+  } catch {
+    return null;
+  }
+}
+
+// Attempts a token refresh over the managed browser's network stack. The
+// context holds SVP's session cookies (incl. the HTTP-only refresh cookie)
+// which are sent automatically, so POST /refresh succeeds from there. Using
+// context.request avoids the page-context CORS restrictions entirely.
+async function refreshTokenInPage() {
+  if (!managedContext) return null;
+  try {
+    const current = getAuthToken();
+    const res = await managedContext.request.post('https://svp-international-api.pacc.sa/api/v1/refresh', {
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-Tenant-Name': 'svp-international',
+        ...(current ? { 'Authorization': `Bearer ${current}` } : {})
+      },
+      data: '{}'
+    });
+    if (res.status() !== 200) return null;
+    const data = await res.json();
+    const t = data.access || null;
+    if (!t) return null;
+    if (managedPage) {
+      await managedPage.evaluate((tok) => {
+        for (const key of ['auth_token', 'token', 'access_token', 'vue-auth.token', 'svp_token', 'auth._token.local']) {
+          localStorage.setItem(key, tok);
+        }
+      }, t).catch(() => {});
+    }
+    return t;
+  } catch {
+    return null;
+  }
+}
+
+function persistToken(t) {
+  try {
+    const clean = t.startsWith('Bearer ') ? t.slice(7) : t;
+    const payload = JSON.parse(Buffer.from(clean.split('.')[1], 'base64').toString());
+    const expiry = payload.exp ? new Date(payload.exp * 1000) : new Date(Date.now() + 60 * 60 * 1000);
+    writeFileSync(TOKEN_FILE, JSON.stringify({ token: clean, expiry: expiry.toISOString() }), 'utf-8');
+  } catch {
+    try { writeFileSync(TOKEN_FILE, JSON.stringify({ token: t }), 'utf-8'); } catch {}
+  }
+}
 
 export async function browserFetch(url, options = {}) {
   const token = getAuthToken();
@@ -344,27 +476,50 @@ export async function browserFetch(url, options = {}) {
   try {
     page = await ensureManagedBrowser();
   } catch (err) {
-    throw err;
+    console.warn('[svp-playwright] browser launch failed, falling back to direct fetch:', err.message);
+    const headers = {
+      'Accept': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'Origin': SVP_BASE,
+      'Referer': `${SVP_BASE}/`,
+      'Authorization': `Bearer ${token}`
+    };
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') headers['Content-Type'] = 'application/json';
+    const res = await fetch(url, { method, headers, body: options.body || undefined });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    return { status: res.status, ok: res.ok, data };
   }
 
+  const doFetch = async (fetchToken) => {
+    const headers = {
+      'Accept': 'application/json',
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'Origin': SVP_BASE,
+      'Referer': `${SVP_BASE}/`,
+      'Authorization': `Bearer ${fetchToken}`
+    };
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH') {
+      headers['Content-Type'] = 'application/json';
+    }
+    // Send through the managed browser's network stack (shares the context's
+    // cookies, no CORS) instead of page-context fetch, which rejects with
+    // "TypeError: Failed to fetch" on cross-origin credentialed requests.
+    const res = await managedContext.request.fetch(url, {
+      method,
+      headers,
+      data: options.body || undefined
+    });
+    const text = await res.text();
+    let data;
+    try { data = JSON.parse(text); } catch { data = text; }
+    return { status: res.status(), ok: res.ok(), data };
+  };
+
+  let result;
   try {
-    const result = await page.evaluate(async ({ fetchUrl, fetchMethod, fetchBody, fetchToken }) => {
-      const headers = { 'Accept': 'application/json', 'Authorization': `Bearer ${fetchToken}` };
-      if (fetchMethod === 'POST' || fetchMethod === 'PUT' || fetchMethod === 'PATCH') {
-        headers['Content-Type'] = 'application/json';
-      }
-      const res = await fetch(fetchUrl, {
-        method: fetchMethod,
-        headers,
-        body: fetchBody || undefined,
-        mode: 'cors'
-      });
-      const text = await res.text();
-      let data;
-      try { data = JSON.parse(text); } catch { data = text; }
-      return { status: res.status, ok: res.ok, data };
-    }, { fetchUrl: url, fetchMethod: method, fetchBody: options.body || null, fetchToken: token });
-    return result;
+    result = await doFetch(token);
   } catch (err) {
     managedBrowserReady = false;
     try { await managedBrowser?.close(); } catch {}
@@ -373,6 +528,22 @@ export async function browserFetch(url, options = {}) {
     managedPage = null;
     throw err;
   }
+
+  // Token was rotated server-side (SPA session keeps refreshing). Try to obtain
+  // the live token and retry once.
+  if (result.status === 401) {
+    let live = await getLiveTokenFromPage(page);
+    if (!live || live === token) {
+      live = await refreshTokenInPage();
+    }
+    if (live && live !== token) {
+      persistToken(live);
+      console.log('[svp-playwright] Refreshed access token after 401');
+      result = await doFetch(live);
+    }
+  }
+
+  return result;
 }
 
 // ─── RESCHEDULE VIA BROWSER FETCH (enables page.route interception) ──
@@ -385,43 +556,29 @@ export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCente
   console.log(`[API RESCHEDULE] POST ${url}`);
 
   try {
-    let body = {};
-
-    if (testCenterId) {
-      // ─── NEW CENTER SPECIFIED ─────────────────────────────────
-      // The user picked a specific center. Send:
-      //  - test_center_id: their explicit center choice (valid center id)
-      //  - exam_session_id: the exact session they picked from the
-      //    center-filtered list — this is authoritative and pins the
-      //    session's center so SVPI cannot auto-assign another one
-      //  - city + language: the fields SVPI's own reschedule wizard sends,
-      //    required for the backend to place the new booking
-      body = {
-        test_date: newDate,
-        test_center_id: Number(testCenterId) || testCenterId,
-        category_id: Number(categoryId) || categoryId
-      };
-      if (examSessionId) {
-        body.exam_session_id = Number(examSessionId) || examSessionId;
-      }
-      if (cityName) body.city = cityName;
-      if (language) body.language = language;
-    } else if (examSessionId) {
-      // ─── ONLY DATE CHANGE (same center) ───────────────────────
-      body = { exam_session_id: Number(examSessionId) || examSessionId };
-      if (categoryId) body.category_id = Number(categoryId) || categoryId;
-      if (newDate) body.test_date = newDate;
-      if (cityName) body.city = cityName;
-      if (language) body.language = language;
-    } else if (newDate) {
-      // ─── DATE ONLY (fallback) ─────────────────────────────────
-      body = { test_date: newDate };
-      if (categoryId) body.category_id = Number(categoryId) || categoryId;
-      if (cityName) body.city = cityName;
-      if (language) body.language = language;
-    } else {
-      return { ok: false, error: 'No valid parameters provided' };
+    if (!examSessionId) {
+      return { ok: false, error: 'An exam session is required for reschedule. The selected session determines the test center that gets assigned.' };
     }
+
+    // Send the full set of fields — same as the original working reschedule:
+    //  - test_date + test_center_id + category_id: what the picked center/date
+    //    pins in the new booking
+    //  - exam_session_id: the exact session the user selected (authoritative —
+    //    SVPI assigns the center of this session)
+    //  - city + language: required by the backend to place the new booking
+    // NOTE: do NOT strip these down to { id, exam_session_id, language_code }.
+    // That reduced payload is accepted with a 200 but SVPI does NOT actually
+    // reschedule, leaving the old booking untouched.
+    const body = {
+      test_date: newDate,
+      test_center_id: Number(testCenterId) || testCenterId,
+      category_id: Number(categoryId) || categoryId
+    };
+    if (examSessionId) {
+      body.exam_session_id = Number(examSessionId) || examSessionId;
+    }
+    if (cityName) body.city = cityName;
+    if (language) body.language = language;
 
     console.log(`[API RESCHEDULE] Payload to SVPI: ${JSON.stringify(body)}`);
 
@@ -449,19 +606,61 @@ export async function rescheduleViaPlaywright(sessionId, newDate, categoryId, te
 
 // ─── REBOOK VIA BROWSER FETCH (creates new reservation after cancellation) ──
 
-export async function rebookViaAPI({ occupationId, examSessionId, languageCode, methodology, categoryId, cityName, testDate }) {
+export async function rebookViaAPI({ occupationId, examSessionId, languageCode, methodology, categoryId, cityName, testDate, siteId, siteCity, duration, startAt }) {
   const token = getAuthToken();
   if (!token) throw new Error('Not authenticated. Please login first.');
 
-  const url = `${SVP_API_BASE}/individual_labor_space/exam_reservations`;
-  console.log(`[API REBOOK] POST ${url}`);
+  const base = `${SVP_API_BASE}/individual_labor_space`;
 
   try {
+    if (!examSessionId) {
+      return { ok: false, error: 'An exam session is required. SVPI assigns the test center of the session you pick, so select one.' };
+    }
+    if (!occupationId) {
+      return { ok: false, error: 'An occupation is required. Rebook under the reservation\'s occupation.' };
+    }
+    if (!languageCode) {
+      return { ok: false, error: 'A language (prometric code, e.g. LOABB) is required. It is sent to SVPI as language_code.' };
+    }
+
+    // Step 1 — hold the slot exactly like SVPI's booking wizard (chunk 8189
+    // createSlotHold -> POST /prometric_scheduling/slots_availabilities with
+    // { slot_id, site_id }). The hold is best-effort: if it fails we still try
+    // createReservation without hold_id, matching the wizard's optional hold.
+    let holdId = null;
+    try {
+      const holdBody = { slot_id: String(examSessionId) };
+      if (siteId) holdBody.site_id = String(siteId);
+      const holdRes = await browserFetch(`${base}/prometric_scheduling/slots_availabilities`, {
+        method: 'POST',
+        body: JSON.stringify(holdBody)
+      });
+      if (holdRes.ok && holdRes.data?.id) {
+        holdId = holdRes.data.id;
+      }
+      console.log(`[API REBOOK] Slot hold: ${holdRes.status} holdId=${holdId}`);
+    } catch (e) {
+      console.warn('[API REBOOK] Slot hold failed, continuing without hold:', e.message);
+    }
+
+    // Step 2 — create the reservation with the SVPI booking-wizard payload
+    // (chunk 8189 handleCreateSession) PLUS the declaration/country fields the
+    // original working rebook sent. language_code is the PROMETRIC code (e.g.
+    // LOABB), NOT the ISO code; methodology is the string 'in_person'
+    // (E.sq.IN_PERSON), NOT a number. country_id + the *_confirmation flags are
+    // kept so SVPI actually persists the reservation (the bookings list is
+    // country-scoped via country_id, and without the declarations SVPI echoes a
+    // 200 but drops the reservation).
     const body = {
+      exam_session_id: String(examSessionId),
       occupation_id: Number(occupationId) || occupationId,
-      exam_session_id: examSessionId,
-      language_code: languageCode || 'en',
-      methodology: Number(methodology) || methodology || 1,
+      language_code: languageCode,
+      methodology: methodology || 'in_person',
+      site_id: siteId || null,
+      site_city: siteCity || null,
+      hold_id: holdId,
+      duration: duration ?? null,
+      start_at: startAt || null,
       country_id: 78,
       accept_declaration: true,
       info_confirmation: true,
@@ -470,7 +669,7 @@ export async function rebookViaAPI({ occupationId, examSessionId, languageCode, 
 
     console.log(`[API REBOOK] Payload to SVPI: ${JSON.stringify(body)}`);
 
-    const result = await browserFetch(url, {
+    const result = await browserFetch(`${base}/exam_reservations`, {
       method: 'POST',
       body: JSON.stringify(body)
     });
@@ -478,7 +677,59 @@ export async function rebookViaAPI({ occupationId, examSessionId, languageCode, 
     console.log(`[API REBOOK] Response: ${result.status} ${result.ok ? 'OK' : 'FAIL'}`);
     console.log(`[API REBOOK] Response body: ${JSON.stringify(result.data).substring(0, 500)}`);
 
-    return result;
+    if (!result.ok) {
+      return result;
+    }
+
+    // Step 3 — complete the booking with the wallet/credits payment, exactly
+    // like the SVPI wizard (chunk 8189 createSessionWithCredits ->
+    // payWithUserCredits). createReservation alone only makes a temporary
+    // reservation that SVPI discards within seconds; the reservation persists
+    // only after payWithUserCredits confirms it.
+    const created = result.data?.exam_reservation || result.data;
+    const reservationId = created?.id || created?.reservation_id || created?.reservationId;
+    if (!reservationId) {
+      return { ok: false, status: result.status, data: result.data, error: 'createReservation returned 2xx but no reservation id.' };
+    }
+
+    const payBody = {
+      methodology_type: methodology || 'in_person',
+      reservation_id: String(reservationId),
+      occupation_id: Number(occupationId) || occupationId
+    };
+    console.log(`[API REBOOK] Paying for reservation ${reservationId}: ${JSON.stringify(payBody)}`);
+
+    const payRes = await browserFetch(`${base}/reservation_credits/use`, {
+      method: 'POST',
+      body: JSON.stringify(payBody)
+    });
+
+    console.log(`[API REBOOK] Payment: ${payRes.status} ${payRes.ok ? 'OK' : 'FAIL'}`);
+    console.log(`[API REBOOK] Payment body: ${JSON.stringify(payRes.data).substring(0, 500)}`);
+
+    const paidReservation = payRes.data?.reservation || payRes.data?.exam_reservation || payRes.data;
+    const paidId = paidReservation?.id || paidReservation?.reservation_id || paidReservation?.reservationId;
+
+    if (payRes.ok && paidId) {
+      const mergedReservation = { ...(created || {}), ...(paidReservation || {}) };
+      if (!mergedReservation.id && paidId) mergedReservation.id = paidId;
+      return {
+        ...result,
+        ok: true,
+        data: { ...result.data, exam_reservation: mergedReservation }
+      };
+    }
+
+    const payError = (payRes.data?.message || payRes.data?.error || payRes.error) ||
+      `Payment step returned HTTP ${payRes.status}. The reservation exists but needs payment to persist.`;
+    console.error(`[API REBOOK] Payment failed: ${payError}`);
+    return {
+      ok: false,
+      status: payRes.status || result.status,
+      data: result.data,
+      error: payError,
+      reservationId
+    };
   } catch (err) {
     console.error(`[API REBOOK] Error: ${err.message}`);
     return { ok: false, error: err.message };

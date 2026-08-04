@@ -1,4 +1,4 @@
-import { getToken } from './svp-playwright.js';
+import { getToken, authenticatedFetch } from './svp-playwright.js';
 
 const API_BASE = 'https://svp-international-api.pacc.sa/api/v1';
 const BANGLADESH_ID = 78;
@@ -18,22 +18,7 @@ function setCache(key, data, ttl) {
   cache.set(key, { data, time: Date.now(), ttl });
 }
 
-function authHeaders() {
-  const token = getToken();
-  const headers = {
-    'Accept': 'application/json',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-    'Origin': 'https://svp-international.pacc.sa',
-    'Referer': 'https://svp-international.pacc.sa/'
-  };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-}
-
-export async function fetchCategories() {
-  const cacheKey = 'categories';
+export async function fetchCategories() {  const cacheKey = 'categories';
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
@@ -70,7 +55,7 @@ export async function fetchAvailableDates(categoryId, city) {
   if (city) params.set('city', city);
 
   const url = `${API_BASE}/individual_labor_space/exam_sessions/available_dates?${params.toString()}`;
-  const res = await fetch(url, { headers: authHeaders() });
+  const res = await authenticatedFetch(url);
   if (!res.ok) throw new Error(`Failed to fetch dates: ${res.status}`);
   const data = await res.json();
 
@@ -102,7 +87,7 @@ export async function fetchCities(categoryId) {
     per_page: '10000'
   });
   const url = `${API_BASE}/individual_labor_space/test_centers/cities?${params.toString()}`;
-  const res = await fetch(url, { headers: authHeaders() });
+  const res = await authenticatedFetch(url);
   if (!res.ok) throw new Error(`Failed to fetch cities: ${res.status}`);
   const data = await res.json();
 
@@ -137,36 +122,35 @@ export async function fetchTestCenters(categoryId, city) {
   return centers;
 }
 
-export async function fetchExamSessions(categoryId, testDate, city, testCenterId) {
+export async function fetchExamSessions(categoryId, testDate, city, testCenterId, reservationId) {
   const token = getToken();
   if (!token) throw new Error('Not authenticated. Please login first.');
 
-  const cacheKey = `sessions:${categoryId}:${testDate || ''}:${city || ''}:${testCenterId || ''}`;
+  const cacheKey = `sessions:${categoryId}:${testDate || ''}:${city || ''}:${testCenterId || ''}:${reservationId || ''}`;
   const cached = getCached(cacheKey);
   if (cached) return cached;
 
   const params = new URLSearchParams({
-    category_id: String(categoryId),
-    country_id: String(BANGLADESH_ID),
-    per_page: '10000'
+    category_id: String(categoryId)
   });
-  if (testDate) params.set('date', testDate);
+  // SVPI's wizard (chunk 7083/8189 getSessions) queries exam_sessions with
+  // exam_date + city + category_id (+ available_seats); reschedule additionally
+  // passes reservation_id. test_center_id narrows the returned sessions to the
+  // exact center the user picked — SVPI returns a DIFFERENT exam_session token
+  // set per test_center_id (verified live: center 62 vs 203 yield different
+  // tokens, for both the fresh and the reservation_id query). Without it the
+  // city-scoped list mixes sessions from every center in the city, which is why
+  // the old rebook booked at a different center than the one the user selected.
+  if (testDate) params.set('exam_date', testDate);
   if (city) params.set('city', city);
   if (testCenterId) params.set('test_center_id', String(testCenterId));
+  if (reservationId) params.set('reservation_id', String(reservationId));
+  params.set('available_seats', 'greater_than::0');
 
   const url = `${API_BASE}/individual_labor_space/exam_sessions?${params.toString()}`;
 
   console.log(`[takamol] fetchExamSessions: ${url}`);
-  let res = await fetch(url, { headers: authHeaders() });
-
-  // If the endpoint does not support the test_center_id filter, retry without
-  // it so the session list still loads (client-side city filtering still applies).
-  if (!res.ok && testCenterId) {
-    params.delete('test_center_id');
-    const fallbackUrl = `${API_BASE}/individual_labor_space/exam_sessions?${params.toString()}`;
-    console.log(`[takamol] fetchExamSessions test_center_id filter failed (${res.status}), retrying without: ${fallbackUrl}`);
-    res = await fetch(fallbackUrl, { headers: authHeaders() });
-  }
+  const res = await authenticatedFetch(url);
 
   if (!res.ok) throw new Error(`Failed to fetch exam sessions: ${res.status}`);
   const data = await res.json();
@@ -213,6 +197,85 @@ export async function fetchExamSessions(categoryId, testDate, city, testCenterId
   const result = { sessions };
   setCache(cacheKey, result, 30 * 1000);
   return result;
+}
+
+export async function fetchReservation(reservationId) {
+  const token = getToken();
+  if (!token) throw new Error('Not authenticated. Please login first.');
+
+  const url = `${API_BASE}/individual_labor_space/exam_reservations/${reservationId}`;
+  const res = await authenticatedFetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch reservation ${reservationId}: ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data;
+}
+
+// SVP's reschedule wizard (chunk 7083, LanguageAndCity.fetchAvailableCities) uses
+// these exact params on exam_sessions/available_dates. Cities and dates are then
+// derived from the response's test_center.city.
+export async function fetchRescheduleAvailableDates(reservationId, categoryId) {
+  const token = getToken();
+  if (!token) throw new Error('Not authenticated. Please login first.');
+
+  const startFrom = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+  const params = new URLSearchParams({
+    reservation_id: String(reservationId),
+    category_id: String(categoryId),
+    start_at_date_from: startFrom,
+    available_seats: 'greater_than::0',
+    status: 'scheduled'
+  });
+  const url = `${API_BASE}/individual_labor_space/exam_sessions/available_dates?${params.toString()}`;
+  console.log(`[takamol] fetchRescheduleAvailableDates: ${url}`);
+
+  const res = await authenticatedFetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch reschedule dates: ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+
+  const rawDates = data.available_dates || data.dates || data.data || [];
+  return { available_dates: rawDates };
+}
+
+export async function fetchPrometricSites({ prometricCode, city, startDate, endDate }) {
+  const token = getToken();
+  if (!token) throw new Error('Not authenticated. Please login first.');
+
+  const params = new URLSearchParams({
+    prometric_code: prometricCode,
+    city,
+    start_date: startDate,
+    end_date: endDate
+  });
+  const url = `${API_BASE}/individual_labor_space/prometric_scheduling/sites_availabilities?${params.toString()}`;
+  console.log(`[takamol] fetchPrometricSites: ${url}`);
+
+  const res = await authenticatedFetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch prometric sites: ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.sites || data.data || [];
+}
+
+export async function fetchPrometricSlots({ siteIds, examId, startDate, endDate }) {
+  const token = getToken();
+  if (!token) throw new Error('Not authenticated. Please login first.');
+
+  const params = new URLSearchParams({
+    site_ids: siteIds.join(','),
+    exam_id: examId || '',
+    start_date: startDate,
+    end_date: endDate
+  });
+  const url = `${API_BASE}/individual_labor_space/prometric_scheduling/slots_availabilities?${params.toString()}`;
+  console.log(`[takamol] fetchPrometricSlots: ${url}`);
+
+  const res = await authenticatedFetch(url);
+  if (!res.ok) throw new Error(`Failed to fetch prometric slots: ${res.status}`);
+  const data = await res.json();
+  if (data.error) throw new Error(data.error);
+  return data.slots_availabilities || data.slots || data.data || [];
 }
 
 export function shutdown() {

@@ -12,7 +12,7 @@ export async function POST(request) {
       );
     }
 
-    const { sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language } = await request.json();
+    const { sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language, languageCode } = await request.json();
 
     if (!sessionId) {
       return NextResponse.json(
@@ -21,9 +21,17 @@ export async function POST(request) {
       );
     }
 
-    if (!examSessionId && !newDate) {
+    if (!examSessionId) {
       return NextResponse.json(
-        { success: false, error: 'examSessionId or newDate is required' },
+        { success: false, error: 'examSessionId is required. Select the exact exam session you want (its test center is what gets assigned).' },
+        { status: 400 }
+      );
+    }
+
+    const langCode = languageCode || language;
+    if (!langCode) {
+      return NextResponse.json(
+        { success: false, error: 'languageCode is required. Please select a language.' },
         { status: 400 }
       );
     }
@@ -36,13 +44,13 @@ export async function POST(request) {
     console.log(`║  newDate:       ${newDate || '(none)'}`);
     console.log(`║  categoryId:    ${categoryId || '(none)'}`);
     console.log(`║  testCenterId:  ${testCenterId || '(none)'}`);
-    console.log(`║  examSessionId: ${examSessionId || '(none)'}`);
+    console.log(`║  examSessionId: ${examSessionId}`);
     console.log(`║  cityName:      ${cityName || '(none)'}`);
-    console.log(`║  language:      ${language || '(none)'}`);
+    console.log(`║  languageCode:  ${langCode}`);
     console.log('╚═══════════════════════════════════════════════════════════');
     console.log('');
 
-    const result = await rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, language);
+    const result = await rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, langCode);
 
     console.log(`[exam/reschedule] Raw result: ${JSON.stringify(result).substring(0, 1000)}`);
 

@@ -1,11 +1,11 @@
 import { NextResponse } from 'next/server';
-import { fetchAvailableDates, fetchCities } from '@/lib/takamol';
+import { fetchAvailableDates, fetchCities, fetchRescheduleAvailableDates } from '@/lib/takamol';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(request) {
   try {
-    const { category, city } = await request.json();
+    const { category, city, reservationId } = await request.json();
 
     if (!category) {
       return NextResponse.json({
@@ -14,9 +14,12 @@ export async function POST(request) {
       });
     }
 
+    // In reschedule mode the wizard sources cities + dates from
+    // exam_sessions/available_dates filtered by the reservation (chunk 7083).
+    const isReschedule = Boolean(reservationId);
     const [dateResult, citiesResult] = await Promise.allSettled([
-      fetchAvailableDates(category, city),
-      fetchCities(category)
+      isReschedule ? fetchRescheduleAvailableDates(reservationId, category) : fetchAvailableDates(category, city),
+      isReschedule ? Promise.resolve([]) : fetchCities(category)
     ]);
 
     const dateErrors = [dateResult, citiesResult].filter(r => r.status === 'rejected').map(r => r.reason?.message || String(r.reason));
@@ -35,6 +38,16 @@ export async function POST(request) {
 
     const citiesRaw = citiesResult.status === 'fulfilled' ? (citiesResult.value || []) : [];
 
+    // Reschedule mode: the SVP wizard derives cities from the available_dates
+    // items (test_center.city), not from the static test_centers/cities list.
+    let derivedCities = [];
+    if (isReschedule) {
+      derivedCities = [...new Set(rawDates
+        .map(d => d.test_center?.city || d.city || d.test_center?.test_center_city)
+        .filter(Boolean))]
+        .sort((a, b) => a.localeCompare(b));
+    }
+
     const extractField = (obj, ...fieldNames) => {
       for (const fn of fieldNames) {
         const val = fn.split('.').reduce((o, k) => o?.[k], obj);
@@ -45,7 +58,7 @@ export async function POST(request) {
 
     const extractDateStr = (obj) => {
       const raw = extractField(obj, 'start_date_in_tc_time_zone', 'date', 'start_date',
-        'start_date_in_browser_time_zone', 'exam_session.test_date', 'exam_session.date');
+        'start_at_in_tc_time_zone', 'start_date_in_browser_time_zone', 'exam_session.test_date', 'exam_session.date');
       if (!raw) return null;
       const m = String(raw).match(/^(\d{4}-\d{2}-\d{2})/);
       return m ? m[1] : null;
@@ -92,17 +105,19 @@ export async function POST(request) {
     dates.sort();
     const uniqueDates = [...new Set(dates)];
 
-    const cities = citiesRaw
-      .map(c => {
-        const name = typeof c === 'string' ? c : c.city || c.name || c.english_name;
-        if (!name) return null;
-        return {
-          id: name.toLowerCase().replace(/\s+/g, '-'),
-          name: name
-        };
-      })
-      .filter(Boolean)
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const cities = isReschedule
+      ? derivedCities.map(name => ({ id: name.toLowerCase().replace(/\s+/g, '-'), name }))
+      : citiesRaw
+        .map(c => {
+          const name = typeof c === 'string' ? c : c.city || c.name || c.english_name;
+          if (!name) return null;
+          return {
+            id: name.toLowerCase().replace(/\s+/g, '-'),
+            name: name
+          };
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.name.localeCompare(b.name));
 
     console.log(`[takamol/dates] Unique dates: ${uniqueDates.length}`);
     console.log(`[takamol/dates] Sessions by date:`, Object.fromEntries(

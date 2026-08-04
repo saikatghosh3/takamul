@@ -1,0 +1,40 @@
+{
+ "url": "https://svp-international.pacc.sa/home",
+ "info": {
+  "text": "Home Certificate Verification Applicant Result Assessors Skills Verification Program The Skills Verification Program aims at verifying that professional workers possess the qualifications and skills required to perform their jobs in Saudi Arabia, which contributes to raising the quality of skill level in the labor market and raising productivity. Join the program PACC Program Knowledge center Privacy Policy Terms Of Use All Rights Reserved For PACC © 2026",
+  "selects": [],
+  "buttons": [
+   {
+    "i": 0,
+    "text": "",
+    "disabled": false
+   },
+   {
+    "i": 1,
+    "text": "Join the program",
+    "disabled": false
+   }
+  ],
+  "sessionBlocks": []
+ },
+ "api": [
+  {
+   "m": "GET",
+   "s": 200,
+   "u": "/flipper/feature_flags?locale=en",
+   "b": "{\"feature_flags\":[{\"name\":\"admin_cancel_reservation\",\"state\":\"true\"},{\"name\":\"admin_cancel_session\",\"state\":\"true\"},{\"name\":\"admin_edit_reservation\",\"state\":\"true\"},{\"name\":\"admin_edits_individual_exam_score\",\"state\":\"true\"},{\"name\":\"admin_export_reservations_xls\",\"state\":\"true\"},{\"name\":\"admin_optionally_return_credits\",\"state\":\"true\"},{\"name\":\"admin_show_exam_session_time\",\"state\":\"true\"},{\"name"
+  },
+  {
+   "m": "GET",
+   "s": 200,
+   "u": "/visitor_space/named_content_page/landing_page?locale=en",
+   "b": "{\"id\":1,\"content_page_items\":[{\"id\":2,\"item_name\":\"ar_title\",\"value\":\"برنامج الفحص المهني\"},{\"id\":4,\"item_name\":\"ar_description\",\"value\":\"هي خدمة تهدف إلى التحقق من امتلاك العامل المهني القادم من الخارج المهارات اللازمة لتأدية المهنة التي يعمل بها، عن طريق أداء اختبارات في مجال تخصصه.\"},{\"id\":1,\"item_name\":\"en_title\",\"value\":\"Skills Verification Program\"},{\"id\":3,\"item_name\":\"en_description\",\"valu"
+  },
+  {
+   "m": "GET",
+   "s": 200,
+   "u": "/visitor_space/countries?per_page=250&locale=en",
+   "b": "{\"countries\":[{\"id\":6,\"arabic_name\":\"الارجنتين\",\"assessor_auto_assignment\":\"manual\",\"cert_expiry_years\":{\"rpl\":2,\"one_test\":2,\"two_tests\":5,\"online_test\":2},\"country_code\":\"ARG\",\"english_name\":\"Argentina\",\"exam_type\":\"category_settings\",\"expiry_years\":5,\"free_reservations\":false,\"load_balancer\":false,\"targeted\":false,\"test_engine\":\"prometric\",\"test_price\":50,\"test_type\":\"in_person\",\"trial_mode\":fa"
+  }
+ ]
+}

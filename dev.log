@@ -1,0 +1,18 @@
+
+> pacc-scraper-api@0.1.0 dev
+> next dev
+
+⚠ Port 3000 is in use by process 38020, using available port 3001 instead.
+▲ Next.js 16.2.10 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://192.168.31.175:3001
+✓ Ready in 505ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3000
+- PID:          38020
+- Dir:          D:\pacc-scraper-api_latest\pacc-scraper-api-latest
+- Log:          .next\dev\logs\next-development.log
+
+Run taskkill /PID 38020 /F to stop it.
+[?25h

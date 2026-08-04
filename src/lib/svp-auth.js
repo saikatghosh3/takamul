@@ -2,6 +2,17 @@ import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 const TOKEN_FILE = join(process.cwd(), '.svp-token.json');
+const STORAGE_FILE = join(process.cwd(), '.svp-storage.json');
+
+// On Windows, Smart App Control blocks unsigned Chromium builds, so point
+// Puppeteer at the signed Microsoft Edge install. Elsewhere (e.g. a Linux VPS)
+// EDGE_PATH stays undefined and Puppeteer falls back to its bundled Chromium.
+const EDGE_PATH = process.platform === 'win32'
+  ? [
+      'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+      'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe'
+    ].find((p) => existsSync(p))
+  : undefined;
 
 let puppeteer = null;
 let authBrowser = null;
@@ -128,6 +139,7 @@ async function doLogin() {
     const pup = await getPuppeteer();
 
     authBrowser = await pup.default.launch({
+      executablePath: EDGE_PATH,
       headless: false,
       args: [
         '--no-sandbox',
@@ -241,6 +253,7 @@ export function logout() {
   authToken = null;
   tokenExpiry = null;
   try { writeFileSync(TOKEN_FILE, '{}', 'utf-8'); } catch {}
+  try { writeFileSync(STORAGE_FILE, '{}', 'utf-8'); } catch {}
 }
 
 export async function authenticatedFetch(url, options = {}) {
@@ -292,6 +305,7 @@ async function getApiPage() {
   }
   const pup = await getPuppeteer();
   apiBrowser = await pup.default.launch({
+    executablePath: EDGE_PATH,
     headless: 'new',
     args: [
       '--no-sandbox',
@@ -377,6 +391,7 @@ async function ensureBrowserForSPA() {
 
   const pup = await getPuppeteer();
   const browser = await pup.default.launch({
+    executablePath: EDGE_PATH,
     headless: false,
     args: [
       '--no-sandbox',
