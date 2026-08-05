@@ -1,0 +1,445 @@
+{
+  "storeLog": [
+    {
+      "afterDashboard": {
+        "isTargeted": true,
+        "isLabor": true,
+        "userKeys": [
+          "userSpace",
+          "isLegislator",
+          "isTestCenterOwner",
+          "isVerificationCompanyManager",
+          "isVerificationCompanyVerifier",
+          "isLabor",
+          "isAssessor",
+          "permissionForViewOnly",
+          "userBalance",
+          "freeCertificates",
+          "userTimeZone",
+          "userCountry",
+          "isTargeted",
+          "isTestOnline",
+          "isLoadBalancerActive"
+        ],
+        "featureFlags": [
+          "featureFlagsMap"
+        ],
+        "flagsRaw": {
+          "featureFlagsMap": {
+            "accreditation_certificates": false,
+            "admin_cancel_reservation": true,
+            "admin_cancel_session": true,
+            "admin_edit_reservation": true,
+            "admin_edits_individual_exam_score": true,
+            "admin_export_reservations_xls": true,
+            "admin_optionally_return_credits": true,
+            "admin_show_exam_session_time": true,
+            "admin_show_local_and_browser_time": true,
+            "admin_show_tc_local_time": true,
+            "assessor_activation": true,
+            "assessor_assignment": false,
+            "assessor_contracting_entity": true,
+            "assessor_passport_recognition_enabled": false,
+            "assessor_prometric_enabled": false,
+            "assessor_registration_request": true,
+            "assessor_start_exam": false,
+            "assessor_upload_exam_evidence": false,
+            "assessor_view_assigned_sessions": false,
+            "cctv_flow_enabled": true,
+            "certification_portfolio": true,
+            "country_manager_approve_assessor_application": true,
+            "country_manager_invitation": true,
+            "country_manager_registration": true,
+            "country_manager_reject_assessor_application": true,
+            "country_manager_view_assessors_details": true,
+            "country_manager_view_assessors_list": true,
+            "custom_errors_renderer": false,
+            "dev_accreditation_certificates": false,
+            "dev_assessor_resubmit": false,
+            "disable_labor_passport_recognition": true,
+            "edit_assessor_other_details_enabled": true,
+            "enable_cbt_minimum_correct_answers": true,
+            "enable_exam_constraint_payment_processing_msg_duration": true,
+            "enable_exam_constraint_reservation_duration": true,
+            "enable_exam_constraint_reservation_rescheduling": true,
+            "enable_exam_constraint_session_min_hours_before_start": true,
+            "enable_exam_constraint_working_hours": true,
+            "enable_labor_rescheduling_flow": true,
+            "enable_otp_in_response": false,
+            "get_driver_license": false,
+            "hide_support": false,
+            "hide_tenant_switcher": true,
+            "labor_cancel_reservation": true,
+            "labor_create_reservation": true,
+            "labor_passport_recognition_enabled": false,
+            "labor_prometric_enabled": false,
+            "labor_reservation_credits": true,
+            "labor_session_reminders": true,
+            "labor_show_tc_local_time": true,
+            "labor_sso": false,
+            "labor_start_exam": false,
+            "labor_view_cancellation_details": true,
+            "legislator_approve_assessor_application": true,
+            "legislator_manage_assessors_certificates": true,
+            "legislator_reject_assessor_application": true,
+            "legislator_view_assessors_details": true,
+            "legislator_view_assessors_list": true,
+            "legislator_view_registered_labors_results": true,
+            "legislator_view_sessions_and_reservations": true,
+            "manual_assessor_assignment": false,
+            "musaned_integration": true,
+            "practical_exam_evaluation": true,
+            "prometric_logs_creator": true,
+            "quality_compliance_admin": false,
+            "re_test_flow": true,
+            "rpl_flow_for_admin": true,
+            "rpl_flow_for_labor": true,
+            "service_now_on": true,
+            "skip_otp_delivery": true,
+            "skip_otp_sms": false,
+            "skip_registration_video_step": true,
+            "skip_sms_otp": true,
+            "super_admin_force_reservation_cancellation": true,
+            "tc_cancel_reservation": true,
+            "tc_cancel_session": true,
+            "tc_create_session": true,
+            "tc_invite_assessor": true,
+            "tc_prometric_enabled": true,
+            "tc_start_exam": true,
+            "tc_upload_exam_evidence": true,
+            "tc_view_assessors_details": true,
+            "tc_view_assessors_list": true,
+            "tc_view_cancellation_details": true,
+            "tc_view_reservations": true,
+            "tc_view_sessions_assigned_assessor": true,
+            "test_engine_integration": true,
+            "use_new_assessor_sign_up": true,
+            "use_new_booking": true,
+            "use_new_change_password": true,
+            "use_new_forgot_password": true,
+            "use_new_labor_sign_up": true,
+            "use_new_labor_transaction_history": true,
+            "use_new_login": true,
+            "use_new_register": true,
+            "use_new_set_password": true,
+            "use_old_reservation_export": true,
+            "use_prometric_request_info": true,
+            "vr_passport_update_enabled": false
+          }
+        },
+        "getters": [
+          "lang",
+          "selectedLang",
+          "pageLoading",
+          "isModalOpen",
+          "isLangEng",
+          "getOtpMethod",
+          "countryList",
+          "phoneCountryList",
+          "countryListTranslated",
+          "getSummary",
+          "formTouched",
+          "showConfirmationModal",
+          "nextCall",
+          "resetRedirectMutations",
+          "getTestCenterById",
+          "isTokenAlreadyRefreshing",
+          "userSpace",
+          "getIsLegislator",
+          "getIsTestCenterOwner",
+          "getIsVcManager",
+          "getIsVcVerifier",
+          "getIsLabor",
+          "getIsAssessor",
+          "permissionForViewOnly",
+          "userBalance",
+          "freeCertificates",
+          "getUserTimeZone",
+          "getUserCountry",
+          "getIsUserTargeted",
+          "getIsTestOnline",
+          "getIsLoadBalancerActive",
+          "step",
+          "typeCard",
+          "paymentStatus",
+          "paymentId",
+          "ndc",
+          "integrity",
+          "hyperpayUrl",
+          "amount",
+          "grandTotal",
+          "transaction",
+          "reservationId",
+          "permissionsObject",
+          "permissionsCountry",
+          "permissionsLabors",
+          "permissionsPayment",
+          "permissionsTestCenters",
+          "permissionsCategories",
+          "permissionsLaborsUploadResults",
+          "permissionsIsFetched",
+          "notifications_list",
+          "not_read_count",
+          "landingPageName",
+          "aboutPageName",
+          "policyPageName",
+          "termsOfUsePageName",
+          "currentContentPage",
+          "certificatePrice",
+          "accountInfo",
+          "getUserCredits"
+        ]
+      }
+    }
+  ],
+  "log": [
+    {
+      "step": "DASHBOARD",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "clickedViewDetails": false,
+      "note": "no view-details link found for reservation"
+    },
+    {
+      "clickFailed": [
+        "reschedule appointment",
+        "reschedule",
+        "edit appointment",
+        "change appointment",
+        "modify appointment",
+        "re-schedule",
+        "إعادة جدولة",
+        "rebooking"
+      ]
+    },
+    {
+      "rescheduleButtonMissing": true,
+      "buttons": [
+        {
+          "i": 0,
+          "text": "Retry",
+          "disabled": false,
+          "visible": false
+        },
+        {
+          "i": 1,
+          "text": "Start Verification",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 2,
+          "text": "Download ticket",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 3,
+          "text": "View details",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 4,
+          "text": "View details",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 5,
+          "text": "",
+          "disabled": false,
+          "visible": false
+        }
+      ]
+    },
+    {
+      "step": "NO-RESCHEDULE-BTN",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "step": "WIZARD-STEP1",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "selectsStep1": []
+    },
+    {
+      "buttonsStep1": [
+        {
+          "i": 0,
+          "text": "Retry",
+          "disabled": false,
+          "visible": false
+        },
+        {
+          "i": 1,
+          "text": "Start Verification",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 2,
+          "text": "Download ticket",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 3,
+          "text": "View details",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 4,
+          "text": "View details",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 5,
+          "text": "",
+          "disabled": false,
+          "visible": false
+        }
+      ]
+    },
+    {
+      "selectsAfterCity": []
+    },
+    {
+      "step": "STEP1-AFTER-PICK",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "clickFailed": [
+        "next",
+        "continue",
+        "التالي",
+        "متابعة",
+        "proceed"
+      ]
+    },
+    {
+      "step": "WIZARD-STEP2",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "buttonsStep2": [
+        {
+          "i": 0,
+          "text": "Retry",
+          "disabled": false,
+          "visible": false
+        },
+        {
+          "i": 1,
+          "text": "Start Verification",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 2,
+          "text": "Download ticket",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 3,
+          "text": "View details",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 4,
+          "text": "View details",
+          "disabled": false,
+          "visible": true
+        },
+        {
+          "i": 5,
+          "text": "",
+          "disabled": false,
+          "visible": false
+        }
+      ]
+    },
+    {
+      "dateClicked": null,
+      "note": "day 20 not found"
+    },
+    {
+      "step": "AFTER-DATE",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "sessionItems": []
+    },
+    {
+      "sessionSelected": null,
+      "note": "no session items; maybe load-balancer date-only step"
+    },
+    {
+      "step": "AFTER-SESSION",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "clickFailed": [
+        "next",
+        "continue",
+        "التالي",
+        "متابعة",
+        "proceed"
+      ]
+    },
+    {
+      "step": "WIZARD-STEP3-SUMMARY",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "holdEventsBeforeConfirm": []
+    },
+    {
+      "clickFailed": [
+        "confirm appointment",
+        "confirm",
+        "submit",
+        "تأكيد الحجز",
+        "تأكيد"
+      ]
+    },
+    {
+      "step": "AFTER-CONFIRM-1",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "clickFailed": [
+        "confirm",
+        "yes",
+        "ok",
+        "نعم",
+        "تأكيد"
+      ]
+    },
+    {
+      "step": "AFTER-CONFIRM-2",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    },
+    {
+      "step": "FINAL",
+      "url": "https://svp-international.pacc.sa/labor/account-dashboard",
+      "text": "العربية\n12\nMD RAZAUL MIAH\nLabor\nAccount Dashboard\nTransactions History\nAdvance your career through professional accreditation\nOur service allows individuals to verify their qualifications and skills in order to obtain professional accreditation and improve their career opportunities.\nStart Verification\n1\nSelect your occupation\n2\nEnter your data\n3\nReview and confirm your information\n4\nPay for the verification\nBookings\nRequests\nOccupation\nLoad and Unload Worker\nBooking No.\n5037880\nDownload ticket\nView details\nOccupation Code\n933301\nBooking Status\nReserved\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n20/08/2026 | 10:30 - 12:30\nOccupation\nLoad and Unload Worker\nBooking No.\n4764810\nView details\nOccupation Code\n933301\nBooking Status\nCanceled\nMethodology\nDirect Assessment\nOnline\nNo\nTest Date\n06/08/2026 | 10:00 - 12:00"
+    }
+  ]
+}

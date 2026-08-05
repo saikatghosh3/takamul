@@ -790,5 +790,16 @@ export async function shutdownBrowserApi() {
   await closeApiBrowser();
 }
 
+// Exposes the already-authenticated SPA page (if any) so debug tooling can
+// drive the real wizard and capture its network calls.
+export function getAuthPage() {
+  return authPage || null;
+}
+
+export function isAuthPageAlive() {
+  if (!authPage) return false;
+  return authPage.evaluate(() => 1).then(() => true, () => false);
+}
+
 process.on('SIGTERM', () => { shutdownAuth(); shutdownBrowserApi(); });
 process.on('SIGINT', () => { shutdownAuth(); shutdownBrowserApi(); });

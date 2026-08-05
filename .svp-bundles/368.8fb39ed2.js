@@ -1,0 +1,2 @@
+<html><head><meta name="color-scheme" content="light dark"></head><body><pre style="word-wrap: break-word; white-space: pre-wrap;">"use strict";(self["webpackChunksvp_international_spa"]=self["webpackChunksvp_international_spa"]||[]).push([[368],{70368:function(n,e,t){t.r(e),t.d(e,{default:function(){return o}});var u=function(){var n=this,e=n._self._c;return e("router-view")},a=[],r={name:"BookingPage"},l=r,s=t(81656),i=(0,s.A)(l,u,a,!1,null,null,null),o=i.exports}}]);
+//# sourceMappingURL=368.8fb39ed2.js.map</pre></body></html>

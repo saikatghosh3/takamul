@@ -1989,6 +1989,7 @@ export default function Home() {
                                 if (!occupationId) { setError('Occupation not found on the reservation.'); return; }
                                 if (!rebookLanguage) { setError('Please select a language.'); return; }
                                 const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
+                                const selectedCenter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
                                 const body = {
                                   categoryId: rescheduleCategory,
                                   occupationId,
@@ -1996,12 +1997,12 @@ export default function Home() {
                                   languageCode: rebookLanguage,
                                   methodology: rebookSelected?.session?.methodology || 'in_person',
                                   newDate: rescheduleNewDate,
-                                  cityName,
-                                  siteId: selectedSessionData?.siteId ?? null,
-                                  siteCity: selectedSessionData?.city || null,
+                                  cityName: selectedCenter?.city || cityName,
+                                  siteId: selectedCenter?.id ?? selectedSessionData?.siteId ?? null,
+                                  siteCity: selectedCenter?.city || selectedSessionData?.city || cityName || null,
                                   duration: selectedSessionData?.duration ?? null,
                                   startAt: selectedSessionData?.startAt || null,
-                                  testCenter: selectedSessionData?.centerName || '',
+                                  testCenter: selectedCenter?.name || selectedSessionData?.centerName || '',
                                   sessionTime: selectedSessionData?.time || ''
                                 };
                                 setPendingPayload({ ...body, _rebook: true });

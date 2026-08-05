@@ -1,0 +1,1470 @@
+[
+  {
+    "id": "276",
+    "desc": "3Com"
+  },
+  {
+    "id": "ELECP",
+    "desc": "A. Electrician ELECP"
+  },
+  {
+    "id": "GMP",
+    "desc": "A. General Maintainer GMP"
+  },
+  {
+    "id": "PIAP",
+    "desc": "A. Passenger Information Agent PIAP"
+  },
+  {
+    "id": "SGP",
+    "desc": "A. Security Guard SGP"
+  },
+  {
+    "id": "TCP",
+    "desc": "A. Toll Collector TCP"
+  },
+  {
+    "id": "USMP",
+    "desc": "A.Utility Systems Maintainer USMP"
+  },
+  {
+    "id": "WEP",
+    "desc": "A.Watch Engineer WEP"
+  },
+  {
+    "id": "ABPS",
+    "desc": "ABPS"
+  },
+  {
+    "id": "283",
+    "desc": "AccessData"
+  },
+  {
+    "id": "AOUSC",
+    "desc": "Administrative Office of the United States Courts"
+  },
+  {
+    "id": "ORALR",
+    "desc": "Administrative Office of the US Courts"
+  },
+  {
+    "id": "22",
+    "desc": "Adobe Systems, Inc."
+  },
+  {
+    "id": "AICPC",
+    "desc": "AICPCU (The Institutes)"
+  },
+  {
+    "id": "ERPA",
+    "desc": "AIRE/ERPA Enrolled Retirement Plan Agent"
+  },
+  {
+    "id": "ALK",
+    "desc": "Al Khaleej"
+  },
+  {
+    "id": "225",
+    "desc": "Altova, Inc"
+  },
+  {
+    "id": "AIPB",
+    "desc": "Am Institute of Professional Bookkeepers"
+  },
+  {
+    "id": "AIPB2",
+    "desc": "Am Institute of Professional Bookkeepers - Prepaid Students"
+  },
+  {
+    "id": "AMZN",
+    "desc": "Amazon Web Services"
+  },
+  {
+    "id": "AALAS",
+    "desc": "American Association for Lab Animal Science"
+  },
+  {
+    "id": "AAMT",
+    "desc": "American Association for Medical Transcription"
+  },
+  {
+    "id": "AAMA",
+    "desc": "American Association of Medical Assistants"
+  },
+  {
+    "id": "ABAM",
+    "desc": "American Board of Addiction Medicine"
+  },
+  {
+    "id": "ABABS",
+    "desc": "American Board of Anesthesiology"
+  },
+  {
+    "id": "ABCC",
+    "desc": "American Board of Comprehensive Care"
+  },
+  {
+    "id": "CDCA",
+    "desc": "American Board of Dental Examiners (ADEX)"
+  },
+  {
+    "id": "ABMG",
+    "desc": "American Board of Medical Genetics and Genomics"
+  },
+  {
+    "id": "ABOM",
+    "desc": "American Board of Obesity Medicine"
+  },
+  {
+    "id": "ABOB",
+    "desc": "American Board of Opticianry - National Contact Lens Examine"
+  },
+  {
+    "id": "ABOS",
+    "desc": "American Board of Orthopaedic Surgery"
+  },
+  {
+    "id": "ABPTS",
+    "desc": "American Board of Physical Therapy Specialties"
+  },
+  {
+    "id": "ABPM1",
+    "desc": "American Board of Preventive Medicine"
+  },
+  {
+    "id": "ABQAU",
+    "desc": "American Board of Quality & Utilization Review Physicians"
+  },
+  {
+    "id": "ABS",
+    "desc": "American Board of Surgery"
+  },
+  {
+    "id": "ACR",
+    "desc": "American College of Radiology"
+  },
+  {
+    "id": "ADA1",
+    "desc": "American Dental Association"
+  },
+  {
+    "id": "AHIMA",
+    "desc": "American Health Information Management Association"
+  },
+  {
+    "id": "AICPA",
+    "desc": "American Institute of Certfied Public Accountants"
+  },
+  {
+    "id": "AOBEM",
+    "desc": "American Osteopathic Board of Emergency Medicine"
+  },
+  {
+    "id": "AOBIM",
+    "desc": "American Osteopathic Board of Internal Medicine"
+  },
+  {
+    "id": "AOBOS",
+    "desc": "American Osteopathic Board Of Orthopedic Surgery"
+  },
+  {
+    "id": "AOBP-DIS",
+    "desc": "American Osteopathic Board of Pediatrics"
+  },
+  {
+    "id": "AOBP",
+    "desc": "American Osteopathic Board of Pediatrics"
+  },
+  {
+    "id": "APMLE",
+    "desc": "American Podiatric Medical Licensing"
+  },
+  {
+    "id": "APA",
+    "desc": "American Psychological Association"
+  },
+  {
+    "id": "ASPA",
+    "desc": "American Retirement Association"
+  },
+  {
+    "id": "ASQ",
+    "desc": "American Society for Quality"
+  },
+  {
+    "id": "ASTD",
+    "desc": "American Society for Training and Development"
+  },
+  {
+    "id": "AWS",
+    "desc": "American Welding Society"
+  },
+  {
+    "id": "243",
+    "desc": "APC"
+  },
+  {
+    "id": "12",
+    "desc": "Apple Certification"
+  },
+  {
+    "id": "ARE40",
+    "desc": "ARE (Graphic Exams)"
+  },
+  {
+    "id": "24",
+    "desc": "ARE TECHNOLOGIES"
+  },
+  {
+    "id": "AZCON",
+    "desc": "Arizona Construction"
+  },
+  {
+    "id": "AZCOS",
+    "desc": "Arizona Cosmetology"
+  },
+  {
+    "id": "AZRES",
+    "desc": "Arizona Real Estate"
+  },
+  {
+    "id": "AR06",
+    "desc": "Arkansas Electric"
+  },
+  {
+    "id": "ASISI",
+    "desc": "ASIS International"
+  },
+  {
+    "id": "ABCI",
+    "desc": "Associated Board Certifications International"
+  },
+  {
+    "id": "ACRP",
+    "desc": "Association for Clinical Research Professionals"
+  },
+  {
+    "id": "AHDI",
+    "desc": "Association for Healthcare Documentation Integrity"
+  },
+  {
+    "id": "ACLP",
+    "desc": "Association of Child Life Professionals"
+  },
+  {
+    "id": "77",
+    "desc": "ATS/Chauncey"
+  },
+  {
+    "id": "AMC",
+    "desc": "Australian Medical Council"
+  },
+  {
+    "id": "AWB",
+    "desc": "Awards On Line"
+  },
+  {
+    "id": "ELECF",
+    "desc": "B. Electrician ELECF"
+  },
+  {
+    "id": "GMF",
+    "desc": "B. General Maintainer GMF"
+  },
+  {
+    "id": "PIAF",
+    "desc": "B. Passenger Information Agent PIAF"
+  },
+  {
+    "id": "SGF",
+    "desc": "B. Security Guard SGF"
+  },
+  {
+    "id": "TCF",
+    "desc": "B. Toll Collector TCF"
+  },
+  {
+    "id": "USMF",
+    "desc": "B.Utility Systems Maintainer USMF"
+  },
+  {
+    "id": "WEF",
+    "desc": "B.Watch Engineer WEF"
+  },
+  {
+    "id": "NHRA",
+    "desc": "Bahrain National Health Regulation Authority"
+  },
+  {
+    "id": "BAT",
+    "desc": "BATTERY"
+  },
+  {
+    "id": "38",
+    "desc": "BEA Systems"
+  },
+  {
+    "id": "BU",
+    "desc": "Boston University"
+  },
+  {
+    "id": "BPUS",
+    "desc": "BP US Pipelines and Logistics"
+  },
+  {
+    "id": "BCCC",
+    "desc": "Broward County Construction Credentialing"
+  },
+  {
+    "id": "CAENG",
+    "desc": "CA Engineers, Land Surveyors and Geologists"
+  },
+  {
+    "id": "CAINT",
+    "desc": "California Court Interpreters"
+  },
+  {
+    "id": "CAELE",
+    "desc": "California Electric"
+  },
+  {
+    "id": "CNA",
+    "desc": "Canadian Nurses Association"
+  },
+  {
+    "id": "CSMLS",
+    "desc": "Canadian Society for Medical Laboratory Science"
+  },
+  {
+    "id": "CandidateC",
+    "desc": "CandidateCentric"
+  },
+  {
+    "id": "6",
+    "desc": "CE Pilot"
+  },
+  {
+    "id": "CRDTS",
+    "desc": "Central Regional Dental Testing Service"
+  },
+  {
+    "id": "CBIC",
+    "desc": "Certification Board of Infection Control and Epidemiology"
+  },
+  {
+    "id": "CBNE",
+    "desc": "Certification Board of Nuclear Endocrinology"
+  },
+  {
+    "id": "CCHI",
+    "desc": "Certification Commission for Healthcare Interpreters"
+  },
+  {
+    "id": "CDMSC",
+    "desc": "Certification of Disability Management Specialist Commission"
+  },
+  {
+    "id": "CECR",
+    "desc": "Certification of Excellence in Clinical Research"
+  },
+  {
+    "id": "CEBS",
+    "desc": "Certified Employee Benefits Specialist"
+  },
+  {
+    "id": "CEBSC",
+    "desc": "Certified Employee Benefits Specialist-Canada"
+  },
+  {
+    "id": "CFP",
+    "desc": "Certified Financial Planner"
+  },
+  {
+    "id": "257",
+    "desc": "Charles Sturt University"
+  },
+  {
+    "id": "227",
+    "desc": "Check Point Software Technolgies"
+  },
+  {
+    "id": "57",
+    "desc": "Citrix Systems, Inc."
+  },
+  {
+    "id": "CNOP",
+    "desc": "City of New Orleans Police"
+  },
+  {
+    "id": "154",
+    "desc": "CIW (Internet Certification)"
+  },
+  {
+    "id": "CMSDM",
+    "desc": "CMSDM"
+  },
+  {
+    "id": "CMT-2",
+    "desc": "CMT test"
+  },
+  {
+    "id": "54",
+    "desc": "Cognos"
+  },
+  {
+    "id": "CFFP",
+    "desc": "College for Financial Planning"
+  },
+  {
+    "id": "CFFP1",
+    "desc": "College for Financial Planning 1"
+  },
+  {
+    "id": "CFPC",
+    "desc": "College of Family Physicians of Canada"
+  },
+  {
+    "id": "9",
+    "desc": "CompTIA"
+  },
+  {
+    "id": "270A",
+    "desc": "Computer Associates"
+  },
+  {
+    "id": "CMT",
+    "desc": "Configuration Management Team"
+  },
+  {
+    "id": "CNFGR",
+    "desc": "Configurator Certification"
+  },
+  {
+    "id": "CITB",
+    "desc": "ConstructionSkills"
+  },
+  {
+    "id": "CITBD",
+    "desc": "ConstructionSkills (SkillsDirect)"
+  },
+  {
+    "id": "CITBI",
+    "desc": "ConstructionSkills International"
+  },
+  {
+    "id": "206",
+    "desc": "Convergence Technologies Professional"
+  },
+  {
+    "id": "CLTC",
+    "desc": "Corporation for Long Term Care Certification"
+  },
+  {
+    "id": "55",
+    "desc": "CTI - Computer Telephony Inst."
+  },
+  {
+    "id": "CMES",
+    "desc": "Cutwater Maritime Education Services"
+  },
+  {
+    "id": "173",
+    "desc": "CWNP - Wireless LAN Certifications"
+  },
+  {
+    "id": "DANTES",
+    "desc": "DANTES"
+  },
+  {
+    "id": "301",
+    "desc": "Data Center University"
+  },
+  {
+    "id": "61",
+    "desc": "Dell Computer"
+  },
+  {
+    "id": "SCHQ2",
+    "desc": "Department of Healthcare Professions - MOPH - State of Qatar"
+  },
+  {
+    "id": "249",
+    "desc": "D-Link"
+  },
+  {
+    "id": "DHCA",
+    "desc": "Dubai Health Care City Authority"
+  },
+  {
+    "id": "EC0",
+    "desc": "EC-Council - Certified Ethical Hacker"
+  },
+  {
+    "id": "EDGE",
+    "desc": "EDGE"
+  },
+  {
+    "id": "ERB",
+    "desc": "Educational Records Bureau"
+  },
+  {
+    "id": "74",
+    "desc": "EHELP"
+  },
+  {
+    "id": "ELIG",
+    "desc": "ELIGIBILITY EXAMS"
+  },
+  {
+    "id": "259",
+    "desc": "Endiva Software, Inc."
+  },
+  {
+    "id": "44",
+    "desc": "Enterasys Networks"
+  },
+  {
+    "id": "EPA",
+    "desc": "Environmental Protection Agency"
+  },
+  {
+    "id": "270",
+    "desc": "Ericsson"
+  },
+  {
+    "id": "EBAS",
+    "desc": "Ethics and Boundaries Assessment Services LLC"
+  },
+  {
+    "id": "CIC",
+    "desc": "Events Industry Council"
+  },
+  {
+    "id": "EESCC",
+    "desc": "Eversource Energy Service Company-Contractor Employees only"
+  },
+  {
+    "id": "73",
+    "desc": "Exam Express (EE0, EE1)"
+  },
+  {
+    "id": "78",
+    "desc": "EXIN"
+  },
+  {
+    "id": "FSBPT",
+    "desc": "Federation of State Boards of Physical Therapy"
+  },
+  {
+    "id": "FSBP2",
+    "desc": "Federation of State Boards of Physycal Therapy - Non Standar"
+  },
+  {
+    "id": "264",
+    "desc": "FileMaker"
+  },
+  {
+    "id": "2",
+    "desc": "FINRA - Continuing Education"
+  },
+  {
+    "id": "278",
+    "desc": "Firearms Control Act: South Africa"
+  },
+  {
+    "id": "FLDOH",
+    "desc": "Florida Department of Health"
+  },
+  {
+    "id": "82",
+    "desc": "Foundry Networks"
+  },
+  {
+    "id": "228",
+    "desc": "Fujitsu - Interstage Master"
+  },
+  {
+    "id": "252",
+    "desc": "Fujitsu - IT License"
+  },
+  {
+    "id": "275",
+    "desc": "Fujitsu - Middleware Certificate Program"
+  },
+  {
+    "id": "242",
+    "desc": "Fujitsu - Systemwalker Master"
+  },
+  {
+    "id": "271",
+    "desc": "Genesys Telecommunications Laboratories"
+  },
+  {
+    "id": "GRPTI",
+    "desc": "Global Reporting Initiative"
+  },
+  {
+    "id": "GRMI",
+    "desc": "Global Risk Management Institute"
+  },
+  {
+    "id": "GRI",
+    "desc": "Graduate Record Examinations"
+  },
+  {
+    "id": "GRTIS",
+    "desc": "GRI GOLD Community members"
+  },
+  {
+    "id": "SGTC",
+    "desc": "Guernsey State Traffic Committee"
+  },
+  {
+    "id": "90",
+    "desc": "Guidance Software"
+  },
+  {
+    "id": "GORD",
+    "desc": "Gulf Organisation for Research & Development"
+  },
+  {
+    "id": "HACCP",
+    "desc": "Hazard Analysis Critical Control Point"
+  },
+  {
+    "id": "HWCCP",
+    "desc": "Health & Wellness Coach Certifying Examination Program"
+  },
+  {
+    "id": "HIAA",
+    "desc": "Health Insurance Assoc. of America"
+  },
+  {
+    "id": "229",
+    "desc": "Hewlett Packard"
+  },
+  {
+    "id": "101",
+    "desc": "HIPAA Academy"
+  },
+  {
+    "id": "232",
+    "desc": "Hitachi Data Systems"
+  },
+  {
+    "id": "88",
+    "desc": "Huawei"
+  },
+  {
+    "id": "103",
+    "desc": "Hyperion Solutions"
+  },
+  {
+    "id": "105",
+    "desc": "IBM"
+  },
+  {
+    "id": "IEEEB",
+    "desc": "IEEE Biometrics"
+  },
+  {
+    "id": "269",
+    "desc": "IIFSA - Information Systems Forensics Association"
+  },
+  {
+    "id": "15",
+    "desc": "IIMC"
+  },
+  {
+    "id": "IOCL",
+    "desc": "Indian Oil Corporation Limited"
+  },
+  {
+    "id": "ISCCM",
+    "desc": "Indian Society of Critical Care Medicine"
+  },
+  {
+    "id": "INRES",
+    "desc": "Indiana Real Estate"
+  },
+  {
+    "id": "IY0",
+    "desc": "Infosys"
+  },
+  {
+    "id": "NCAS",
+    "desc": "Inspire Global Assessments/Inspire Évaluations Mondiales"
+  },
+  {
+    "id": "ISM",
+    "desc": "Institute for Supply Management"
+  },
+  {
+    "id": "IOB",
+    "desc": "Institute of Banking"
+  },
+  {
+    "id": "253",
+    "desc": "Institute of Certified Management Accountants (ICMA)"
+  },
+  {
+    "id": "314",
+    "desc": "Intel"
+  },
+  {
+    "id": "IRSRP",
+    "desc": "Internal Revenue Service Registered Tax Return Preparer"
+  },
+  {
+    "id": "IBCE",
+    "desc": "International Board of Chiropractic Examiners"
+  },
+  {
+    "id": "IBHRE",
+    "desc": "International Board of Heart Rhythm Examiners"
+  },
+  {
+    "id": "IBSC",
+    "desc": "International Board of Specialty Certification"
+  },
+  {
+    "id": "ICA",
+    "desc": "International Claim Administration"
+  },
+  {
+    "id": "ICVA",
+    "desc": "International Council for Veterinary Assessment"
+  },
+  {
+    "id": "NBVME",
+    "desc": "International Council for Veterinary Assessment-discontinued"
+  },
+  {
+    "id": "IFMA",
+    "desc": "International Facility Management Association"
+  },
+  {
+    "id": "IFIA",
+    "desc": "International Federation of Inspection Agencies"
+  },
+  {
+    "id": "IIBA",
+    "desc": "International Institute of Business Analysis"
+  },
+  {
+    "id": "ISCD",
+    "desc": "International Society for Clinical Densitometry"
+  },
+  {
+    "id": "ISSA",
+    "desc": "International Sports Science Association"
+  },
+  {
+    "id": "IAINS",
+    "desc": "Iowa Insurance"
+  },
+  {
+    "id": "IAPLM",
+    "desc": "Iowa Plumbing"
+  },
+  {
+    "id": "IRS",
+    "desc": "IRS Special Enrollment Examination"
+  },
+  {
+    "id": "ISA",
+    "desc": "ISA Certification & Security Certificate Exams"
+  },
+  {
+    "id": "ISA84",
+    "desc": "ISA84 Certificate Program"
+  },
+  {
+    "id": "ISACA",
+    "desc": "ISACA"
+  },
+  {
+    "id": "35",
+    "desc": "ISEB"
+  },
+  {
+    "id": "115",
+    "desc": "JPN SECURTIES DEAL (JA2)"
+  },
+  {
+    "id": "117",
+    "desc": "Juniper Networks"
+  },
+  {
+    "id": "KAPLN",
+    "desc": "Kaplan Official Test Day Experience"
+  },
+  {
+    "id": "LIHS",
+    "desc": "Lifesupporters Institute of Health Sciences"
+  },
+  {
+    "id": "130",
+    "desc": "Linux Professional Institute"
+  },
+  {
+    "id": "LOADCC",
+    "desc": "LOAD Credit Card"
+  },
+  {
+    "id": "LOADELG",
+    "desc": "LOAD ELIGIBILITY"
+  },
+  {
+    "id": "123",
+    "desc": "Lotus Development"
+  },
+  {
+    "id": "LAINS",
+    "desc": "Louisiana Insurance"
+  },
+  {
+    "id": "239",
+    "desc": "Macromedia"
+  },
+  {
+    "id": "133",
+    "desc": "MAGIC SOFTWARE ENT"
+  },
+  {
+    "id": "MDCOS",
+    "desc": "Maryland Cosmetology"
+  },
+  {
+    "id": "MDINS",
+    "desc": "Maryland Insurance Administration"
+  },
+  {
+    "id": "MAINS",
+    "desc": "Massachusetts Insurance"
+  },
+  {
+    "id": "261",
+    "desc": "MECP"
+  },
+  {
+    "id": "132",
+    "desc": "Microsoft"
+  },
+  {
+    "id": "265",
+    "desc": "Mile 2 Security Asia Pacific"
+  },
+  {
+    "id": "280",
+    "desc": "Mile2 Security USA, Europe & Mid-East"
+  },
+  {
+    "id": "295",
+    "desc": "Mincom"
+  },
+  {
+    "id": "MPCON",
+    "desc": "Minneapolis Construction"
+  },
+  {
+    "id": "MNDJE",
+    "desc": "Minnesota Board of Dentistry Jurisprudence Exam"
+  },
+  {
+    "id": "MNDA",
+    "desc": "Minnesota Board of Dentistry State Licensing Exam"
+  },
+  {
+    "id": "MNCON",
+    "desc": "Minnesota Construction"
+  },
+  {
+    "id": "MNCOS",
+    "desc": "Minnesota Cosmetology"
+  },
+  {
+    "id": "MNINS",
+    "desc": "Minnesota Insurance"
+  },
+  {
+    "id": "MNRES",
+    "desc": "Minnesota Real Estate"
+  },
+  {
+    "id": "MOCOS",
+    "desc": "Missouri Cosmetology"
+  },
+  {
+    "id": "MLCI",
+    "desc": "MLCI Medical Legal Consulting Inst."
+  },
+  {
+    "id": "148",
+    "desc": "NACSE"
+  },
+  {
+    "id": "NCCAA",
+    "desc": "Nat. Commission for Cert. of Anesthesiologist Assistants"
+  },
+  {
+    "id": "NASBA",
+    "desc": "National Association State Board of Accountancy"
+  },
+  {
+    "id": "NBCOA",
+    "desc": "National Board of Certified Option Advisors"
+  },
+  {
+    "id": "NBCE",
+    "desc": "National Board of Chiropractic Examiners"
+  },
+  {
+    "id": "NBE",
+    "desc": "National Board of Echocardiography"
+  },
+  {
+    "id": "NBMEI",
+    "desc": "National Board of Medical Examiners Item Review"
+  },
+  {
+    "id": "NBPHE",
+    "desc": "National Board of Public Health Examiners"
+  },
+  {
+    "id": "NCSC",
+    "desc": "National Center for State Courts"
+  },
+  {
+    "id": "NCBTM",
+    "desc": "National Certification Board for Therapeutic Massage"
+  },
+  {
+    "id": "ARE50",
+    "desc": "National Council of Architect Registration Boards"
+  },
+  {
+    "id": "NDEB",
+    "desc": "National Dental Examining Board of Canada"
+  },
+  {
+    "id": "ASE",
+    "desc": "National Institute for Automotive Service Excellence"
+  },
+  {
+    "id": "NICET",
+    "desc": "National Institute for Certification of Engineering Tech."
+  },
+  {
+    "id": "NRCME",
+    "desc": "National Registry of Certified Medical Examiners"
+  },
+  {
+    "id": "MSS",
+    "desc": "NBME Subject Examination Program"
+  },
+  {
+    "id": "NBMES",
+    "desc": "NBME Test Delivery Software Field Trial"
+  },
+  {
+    "id": "274",
+    "desc": "NCR ATM"
+  },
+  {
+    "id": "151",
+    "desc": "NCR Teradata"
+  },
+  {
+    "id": "NCTRC",
+    "desc": "NCTRC"
+  },
+  {
+    "id": "268",
+    "desc": "NEC"
+  },
+  {
+    "id": "NERC",
+    "desc": "NERC"
+  },
+  {
+    "id": "236",
+    "desc": "Net Expert"
+  },
+  {
+    "id": "152",
+    "desc": "Network Appliance"
+  },
+  {
+    "id": "189",
+    "desc": "Network General Corp (Sniffer)"
+  },
+  {
+    "id": "NJCOS",
+    "desc": "New Jersey Cosmetology"
+  },
+  {
+    "id": "NJFBA",
+    "desc": "New Jersey Fire & Burglar Alarm"
+  },
+  {
+    "id": "NJMD",
+    "desc": "New Jersey Multiple Dwelling Inspector"
+  },
+  {
+    "id": "NMCON",
+    "desc": "New Mexico Construction"
+  },
+  {
+    "id": "NYBLD",
+    "desc": "New York Builders"
+  },
+  {
+    "id": "NYINS",
+    "desc": "New York Insurance"
+  },
+  {
+    "id": "149",
+    "desc": "Nokia"
+  },
+  {
+    "id": "NPS",
+    "desc": "Nokia Partner Skills"
+  },
+  {
+    "id": "NON-ELIG",
+    "desc": "NON-ELIG"
+  },
+  {
+    "id": "39",
+    "desc": "Nortel"
+  },
+  {
+    "id": "NERB",
+    "desc": "Northeast Board of Dental Examiners"
+  },
+  {
+    "id": "155",
+    "desc": "Novell, Inc."
+  },
+  {
+    "id": "OCC",
+    "desc": "Office - Comptroller of Currency"
+  },
+  {
+    "id": "OHCON",
+    "desc": "Ohio Construction"
+  },
+  {
+    "id": "OHINS",
+    "desc": "Ohio Insurance"
+  },
+  {
+    "id": "EEEEE",
+    "desc": "OLD Do not User"
+  },
+  {
+    "id": "244",
+    "desc": "OMG"
+  },
+  {
+    "id": "294",
+    "desc": "Open Group"
+  },
+  {
+    "id": "OAT",
+    "desc": "Optometry Admission Testing Program"
+  },
+  {
+    "id": "ORCON",
+    "desc": "Oregon Construction"
+  },
+  {
+    "id": "ORINS",
+    "desc": "Oregon Insurance"
+  },
+  {
+    "id": "273",
+    "desc": "PatchLink"
+  },
+  {
+    "id": "UPC",
+    "desc": "Pearl Community OR Building Rating System Exam"
+  },
+  {
+    "id": "PNCB",
+    "desc": "Pediatric Nursing Certification Board"
+  },
+  {
+    "id": "PAINS",
+    "desc": "Pennsylvania Insurance"
+  },
+  {
+    "id": "PCERT",
+    "desc": "PeopleCert"
+  },
+  {
+    "id": "247",
+    "desc": "PeopleSoft"
+  },
+  {
+    "id": "175",
+    "desc": "PES - Real Estate- Alabama (042)"
+  },
+  {
+    "id": "175",
+    "desc": "PES - Real Estate- South Dakota (144)"
+  },
+  {
+    "id": "175",
+    "desc": "PES - Real Estate-Nebraska (043)"
+  },
+  {
+    "id": "175",
+    "desc": "PES - Real Estate-New Mexico (044)"
+  },
+  {
+    "id": "175",
+    "desc": "PES - Real Estate-Oregon (049)"
+  },
+  {
+    "id": "AREQC",
+    "desc": "PILOT"
+  },
+  {
+    "id": "164",
+    "desc": "Polycom"
+  },
+  {
+    "id": "383",
+    "desc": "Portal Software"
+  },
+  {
+    "id": "170",
+    "desc": "POWERSOFT [INACTIVE]"
+  },
+  {
+    "id": "FSBP3",
+    "desc": "Practice Review Tool"
+  },
+  {
+    "id": "PLUS",
+    "desc": "Professional Liability Underwriting Society"
+  },
+  {
+    "id": "237",
+    "desc": "Project A"
+  },
+  {
+    "id": "167",
+    "desc": "PROMETRIC - SURVEYS"
+  },
+  {
+    "id": "60",
+    "desc": "PROMETRIC ADMINISTRATION TCA"
+  },
+  {
+    "id": "234",
+    "desc": "Prometric Sample"
+  },
+  {
+    "id": "246",
+    "desc": "PTC - Parametric Technology Corporation"
+  },
+  {
+    "id": "QQL",
+    "desc": "QuantInsti Quantitative Learning Private Limited"
+  },
+  {
+    "id": "QUIN",
+    "desc": "Quinnipiac Unniversity"
+  },
+  {
+    "id": "RESNA",
+    "desc": "Rehabilitation Engineering and Assistive Technology Society"
+  },
+  {
+    "id": "302",
+    "desc": "RES"
+  },
+  {
+    "id": "179",
+    "desc": "Riverstone Networks"
+  },
+  {
+    "id": "RY",
+    "desc": "Ruby Association Certified Ruby Programmer"
+  },
+  {
+    "id": "SQF",
+    "desc": "Safe Quality Foods"
+  },
+  {
+    "id": "131",
+    "desc": "SAIR/GNU (LINUX)"
+  },
+  {
+    "id": "199",
+    "desc": "SAS Institute"
+  },
+  {
+    "id": "SCAT",
+    "desc": "SCAT- School & College Ability Test"
+  },
+  {
+    "id": "SICP",
+    "desc": "Schweser Institute Certificate Programs"
+  },
+  {
+    "id": "SICP2",
+    "desc": "Schweser Institute Certificate Programs (Retesters)"
+  },
+  {
+    "id": "240",
+    "desc": "SEA/J"
+  },
+  {
+    "id": "125",
+    "desc": "Security Certified Program"
+  },
+  {
+    "id": "191",
+    "desc": "SeeBeyond"
+  },
+  {
+    "id": "SHA",
+    "desc": "Sharjah Health Authority"
+  },
+  {
+    "id": "258",
+    "desc": "SNIA Certification Program"
+  },
+  {
+    "id": "110",
+    "desc": "SNIA FC SAN Certification"
+  },
+  {
+    "id": "SCDM",
+    "desc": "Society for Clinical Data Management"
+  },
+  {
+    "id": "SWIFT",
+    "desc": "Society for Worldwide Interbank Financial Telecommunication"
+  },
+  {
+    "id": "SAWA",
+    "desc": "Society of Animal Welfare Administrators"
+  },
+  {
+    "id": "183",
+    "desc": "SOFTDESK"
+  },
+  {
+    "id": "192",
+    "desc": "Software Testing Support"
+  },
+  {
+    "id": "SCINS",
+    "desc": "South Carolina Insurance"
+  },
+  {
+    "id": "SDINS",
+    "desc": "South Dakota Insurance"
+  },
+  {
+    "id": "SPEX",
+    "desc": "Special Purposes Exam"
+  },
+  {
+    "id": "SPEXP",
+    "desc": "Special Purposes Exam Practice"
+  },
+  {
+    "id": "STB",
+    "desc": "STB - Spatial Test Battery"
+  },
+  {
+    "id": "184",
+    "desc": "Sun Microsystems"
+  },
+  {
+    "id": "SCC",
+    "desc": "Supply-Chain Council"
+  },
+  {
+    "id": "HSE",
+    "desc": "Surgery of the Hand Subspecialty Certification Examination"
+  },
+  {
+    "id": "262",
+    "desc": "SuSE"
+  },
+  {
+    "id": "SWIF2",
+    "desc": "SWIFT Customers"
+  },
+  {
+    "id": "181",
+    "desc": "Sybase, Inc."
+  },
+  {
+    "id": "198",
+    "desc": "Symantec"
+  },
+  {
+    "id": "TNCON",
+    "desc": "Tennessee Construction"
+  },
+  {
+    "id": "TBCE",
+    "desc": "Texas B Chiropractic Examiner"
+  },
+  {
+    "id": "TXINS",
+    "desc": "Texas Insurance"
+  },
+  {
+    "id": "TSBDE",
+    "desc": "Texas State Board of Dental Examiners"
+  },
+  {
+    "id": "TXSFM",
+    "desc": "Texas State Fire Marshal's"
+  },
+  {
+    "id": "TAC",
+    "desc": "The American College"
+  },
+  {
+    "id": "ATT",
+    "desc": "The Association of Taxation Technicians"
+  },
+  {
+    "id": "CIOT",
+    "desc": "The Chartered Institute of Taxation"
+  },
+  {
+    "id": "TCN1",
+    "desc": "The College Network-Ace"
+  },
+  {
+    "id": "ICB",
+    "desc": "The Institute of Canadian Bankers"
+  },
+  {
+    "id": "182",
+    "desc": "The SCO Group, Inc"
+  },
+  {
+    "id": "201",
+    "desc": "TIBCO Software Inc."
+  },
+  {
+    "id": "TOEFL",
+    "desc": "TOEFL - Test of English as a Foreign Language"
+  },
+  {
+    "id": "245",
+    "desc": "Trend Micro"
+  },
+  {
+    "id": "207",
+    "desc": "TruSecure (TICSA)"
+  },
+  {
+    "id": "204",
+    "desc": "Turbolinux Inc."
+  },
+  {
+    "id": "UBS",
+    "desc": "UBS Financial Services Inc."
+  },
+  {
+    "id": "248",
+    "desc": "Unisys"
+  },
+  {
+    "id": "USMS",
+    "desc": "United States Marshals Service"
+  },
+  {
+    "id": "USPS",
+    "desc": "United States Postal Service"
+  },
+  {
+    "id": "UVSS",
+    "desc": "Universita’ Vita-Salute San Raffaele"
+  },
+  {
+    "id": "255",
+    "desc": "Universitas 21 Global"
+  },
+  {
+    "id": "USMLE",
+    "desc": "USMLE Practice Tests"
+  },
+  {
+    "id": "UTINS",
+    "desc": "Utah Insurance"
+  },
+  {
+    "id": "175",
+    "desc": "VA REAL ESTATE"
+  },
+  {
+    "id": "VACC",
+    "desc": "Vascular Access Certification Corporation"
+  },
+  {
+    "id": "VAC",
+    "desc": "Vascular Access Certification Corporation"
+  },
+  {
+    "id": "VESG",
+    "desc": "Verizon Enterprise Solutions"
+  },
+  {
+    "id": "VTINS",
+    "desc": "Vermont Insurance"
+  },
+  {
+    "id": "VACOS",
+    "desc": "Virginia Cosmetology"
+  },
+  {
+    "id": "INSVA",
+    "desc": "Virginia Department of Insurance"
+  },
+  {
+    "id": "VAPHA",
+    "desc": "Virginia Pharmacy"
+  },
+  {
+    "id": "VMV",
+    "desc": "Vision, Mission and Values Project"
+  },
+  {
+    "id": "WAG",
+    "desc": "WAG"
+  },
+  {
+    "id": "WREB",
+    "desc": "Western Regional Examining Board"
+  },
+  {
+    "id": "219",
+    "desc": "WIFI STEIERMARK"
+  },
+  {
+    "id": "I1",
+    "desc": "XML Master"
+  },
+  {
+    "id": "104",
+    "desc": "XML Master Certification"
+  },
+  {
+    "id": "TMC",
+    "desc": "巨量引擎数字营销职业能力认证"
+  }
+]

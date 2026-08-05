@@ -1,0 +1,222 @@
+[
+ {
+  "id": 403,
+  "address": "Mohammad Ibrahim Bhuiya Tower,  Kawla Bazar Road,  Khilkhet,  Dakhin Khan, Dhaka-1229",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Arkan Al-Taameer for professional classification - Dhaka"
+ },
+ {
+  "id": 296,
+  "address": "Joarianala, Ramu, Cox's Bazar-8730",
+  "city": "Chattogram",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Ramu Technical Training Centre"
+ },
+ {
+  "id": 265,
+  "address": "Hanail, Joypurhat",
+  "city": "Rajshahi",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Joypurhat Technical Training Center "
+ },
+ {
+  "id": 240,
+  "address": "Town Kalikapur, Patuakhali sadar, Patuakhali",
+  "city": "Barishal",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Patuakhali Technical Training Centre"
+ },
+ {
+  "id": 223,
+  "address": "529/4, West Bandutia, Beutha, Manikganj sadar, Manikganj",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Manikganj Technical Training Center"
+ },
+ {
+  "id": 221,
+  "address": "Makshahar,Rudrakar,Shariatpur",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Shariatpur Technical Training Centre"
+ },
+ {
+  "id": 220,
+  "address": "Katabaria, Kishoreganj sadar, Kishoreganj.",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Kishoreganj Technical Training Centre"
+ },
+ {
+  "id": 218,
+  "address": "Shibpur, Narsingdi",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Narsingdi Technical Training Center"
+ },
+ {
+  "id": 203,
+  "address": "Begumganj,Noakhal",
+  "city": "Cumilla",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Noakhali Technical Training Centre"
+ },
+ {
+  "id": 201,
+  "address": "Bangladesh",
+  "city": "Rajshahi",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Pabna Technical Training Centre"
+ },
+ {
+  "id": 181,
+  "address": "Durgapur, Dumurtola, Narail",
+  "city": "Khulna",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Narail Technical Training Centre"
+ },
+ {
+  "id": 180,
+  "address": "Kumartek, Charmugaria, Madaripur",
+  "city": "Barishal",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Madaripur Technical Training Centre "
+ },
+ {
+  "id": 174,
+  "address": "Bhatshala, Brahmanbaria Sadar, Brahmanbaria.",
+  "city": "Cumilla",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Brahmanbaria Technical Training Centre"
+ },
+ {
+  "id": 171,
+  "address": "Nazir Sankar pur Jashore",
+  "city": "Khulna",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Jashore Technical Training Centre"
+ },
+ {
+  "id": 168,
+  "address": "Baroghoriya, Sadar, Chapainawabganj",
+  "city": "Rajshahi",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Chapainawabganj Technical Training Centre"
+ },
+ {
+  "id": 166,
+  "address": "Brahmankanda, Faridpur Sadar, Faridpur ",
+  "city": "Barishal",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Faridpur Technical Training Centre"
+ },
+ {
+  "id": 156,
+  "address": "Telegati, Khulna",
+  "city": "Khulna",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Khulna Technical Training Centre"
+ },
+ {
+  "id": 115,
+  "address": "Gazipur-1702",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "BRTC Central Training Institute Gazipur"
+ },
+ {
+  "id": 107,
+  "address": "Nishindara Bogura",
+  "city": "Rajshahi",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Bogura Technical Training Centre"
+ },
+ {
+  "id": 102,
+  "address": "Nagor Jalfai, Tangail",
+  "city": "Dhaka",
+  "country": {
+   "id": 78,
+   "arabic_name": "بنجلاديش",
+   "english_name": "Bangladesh"
+  },
+  "name": "Tangail Technical Training Center"
+ }
+]

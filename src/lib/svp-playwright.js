@@ -559,26 +559,35 @@ export async function rescheduleViaAPI(sessionId, newDate, categoryId, testCente
     if (!examSessionId) {
       return { ok: false, error: 'An exam session is required for reschedule. The selected session determines the test center that gets assigned.' };
     }
-
-    // Send the full set of fields — same as the original working reschedule:
-    //  - test_date + test_center_id + category_id: what the picked center/date
-    //    pins in the new booking
-    //  - exam_session_id: the exact session the user selected (authoritative —
-    //    SVPI assigns the center of this session)
-    //  - city + language: required by the backend to place the new booking
-    // NOTE: do NOT strip these down to { id, exam_session_id, language_code }.
-    // That reduced payload is accepted with a 200 but SVPI does NOT actually
-    // reschedule, leaving the old booking untouched.
-    const body = {
-      test_date: newDate,
-      test_center_id: Number(testCenterId) || testCenterId,
-      category_id: Number(categoryId) || categoryId
-    };
-    if (examSessionId) {
-      body.exam_session_id = Number(examSessionId) || examSessionId;
+    if (!language) {
+      return { ok: false, error: 'A language is required for reschedule. Send the SVPI prometric code (e.g. LOABB), not the ISO code (e.g. bn).' };
     }
-    if (cityName) body.city = cityName;
-    if (language) body.language = language;
+
+    // Exact SVPI wizard payload (reschedule-appointment chunk 7083 / RPL 4823):
+    //   rescheduleAppointment() {
+    //     const t = { id: this.reservation.id,
+    //                 exam_session_id: this.selectedSession.id,
+    //                 language_code: this.formData.language.code }
+    //     this.recheduleReservation(t)
+    //   }
+    // and the Vuex action posts POST exam_reservations/{id}/reschedule with
+    // that body. So:
+    //   - id:             reservation id (also in the URL)
+    //   - exam_session_id: the exact session the user picked. THIS is what pins
+    //                      the test center — each session token belongs to one
+    //                      center, so passing the session of the chosen center
+    //                      is how the picked center gets assigned. Send it as a
+    //                      string (SVPI session ids are opaque tokens).
+    //   - language_code:  the PROMETRIC code (LOABB etc.), NOT the ISO code and
+    //                      NOT the field name `language`.
+    // NOTE: do NOT send test_date / test_center_id / category_id / city here —
+    // SVPI's reschedule API does not use them; the session id fully determines
+    // date + time + center, and language_code determines the language.
+    const body = {
+      id: Number(sessionId) || sessionId,
+      exam_session_id: String(examSessionId),
+      language_code: language
+    };
 
     console.log(`[API RESCHEDULE] Payload to SVPI: ${JSON.stringify(body)}`);
 
