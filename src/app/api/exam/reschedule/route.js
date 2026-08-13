@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isLoggedIn, rescheduleViaAPI } from '@/lib/svp-playwright';
+import { fetchExamSessions } from '@/lib/takamol';
 
 export const dynamic = 'force-dynamic';
 
@@ -49,6 +50,31 @@ export async function POST(request) {
     console.log(`║  languageCode:  ${langCode}`);
     console.log('╚═══════════════════════════════════════════════════════════');
     console.log('');
+
+    // Pre-post safety check: confirm the picked exam session belongs to the
+    // selected center BEFORE posting. exam_sessions scoped by test_center_id
+    // returns a disjoint token set per center (verified live, including with
+    // reservation_id), so a session missing from the center-scoped list cannot
+    // be that center's session. The reschedule list is always the targeted
+    // source, so this is exact.
+    if (testCenterId) {
+      try {
+        const verify = await fetchExamSessions(categoryId, newDate, cityName, testCenterId, sessionId);
+        const scopedIds = (verify.sessions || []).map(s => String(s.id || s.exam_session_id || s.exam_session?.id));
+        if (scopedIds.length > 0 && !scopedIds.includes(String(examSessionId))) {
+          console.warn(`[exam/reschedule] SAFETY BLOCK: exam_session_id ${examSessionId} not in center ${testCenterId} scoped list (${scopedIds.length} sessions). Refusing to post.`);
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Safety check: the selected session does not belong to the chosen center (center id ${testCenterId}). Refusing to post. Reload sessions and pick a session listed under that center.`
+            },
+            { status: 409 }
+          );
+        }
+      } catch (e) {
+        console.warn(`[exam/reschedule] Safety verify failed (continuing): ${e.message}`);
+      }
+    }
 
     const result = await rescheduleViaAPI(sessionId, newDate, categoryId, testCenterId, examSessionId, cityName, langCode);
 

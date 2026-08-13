@@ -612,6 +612,7 @@ export default function Home() {
       try {
         const cityObj = rescheduleCity ? rescheduleCities.find(c => c.id === rescheduleCity) : null;
         const cityName = cityObj ? cityObj.name : undefined;
+        const selectedCenterObj = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
         const res = await fetch('/api/takamol/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -652,9 +653,10 @@ export default function Home() {
               date,
               time,
               city: s.site_city || s.test_center?.city || s.test_center?.test_center_city || '',
-              centerName: s.site_name || s.test_center?.test_center_name || s.test_center?.name || '',
+              centerName: s.site_name || s.test_center?.test_center_name || s.test_center?.name || (selectedCenterObj ? selectedCenterObj.name : ''),
               address: s.site_address || '',
               seats: s.available_seats ?? s.seats_available ?? s.slots_available ?? s.capacity ?? null,
+              siteId: s.site_id ?? null,
               raw: s,
               dateMatch
             };
@@ -677,7 +679,7 @@ export default function Home() {
     }
     loadSessions();
     return () => { cancelled = true; };
-  }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCenter, rescheduleCities, rescheduleReservationId, rescheduleLanguage]);
+  }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCenter, rescheduleCenters, rescheduleCities, rescheduleReservationId, rescheduleLanguage]);
 
   useEffect(() => {
     let cancelled = false;
@@ -695,6 +697,7 @@ export default function Home() {
       try {
         const cityObj = rescheduleCity ? rescheduleCities.find(c => c.id === rescheduleCity) : null;
         const cityName = cityObj ? cityObj.name : undefined;
+        const selectedCenterObj = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
         const res = await fetch('/api/takamol/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -728,7 +731,7 @@ export default function Home() {
               date,
               time,
               city: s.site_city || s.test_center?.city || s.test_center?.test_center_city || '',
-              centerName: s.site_name || s.test_center?.test_center_name || s.test_center?.name || '',
+              centerName: s.site_name || s.test_center?.test_center_name || s.test_center?.name || (selectedCenterObj ? selectedCenterObj.name : ''),
               address: s.site_address || '',
               seats: s.available_seats ?? s.seats_available ?? s.slots_available ?? s.capacity ?? null,
               siteId: s.site_id ?? null,
@@ -751,7 +754,7 @@ export default function Home() {
     }
     loadRebookSessions();
     return () => { cancelled = true; };
-  }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCenter, rescheduleCities, rebookLanguage]);
+  }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCenter, rescheduleCenters, rescheduleCities, rebookLanguage]);
 
   const filteredCityDates = useMemo(() => {
     if (!selectedCategory || !selectedCity) return { dates: [], source: 'none' };
@@ -1640,11 +1643,16 @@ export default function Home() {
                                 const selectedCenterForFilter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
                                 const filteredSessions = rescheduleAvailableSessions.filter(s => {
                                   if (!rescheduleCenter) return true;
-                                  const sessionCenterId = s.raw?.test_center?.id ?? s.raw?.test_center_id ?? s.test_center?.id ?? s.test_center_id ?? null;
-                                  const sessionCenterName = s.centerName || s.raw?.test_center?.name || s.raw?.site_name || '';
-                                  if (sessionCenterId == null && !sessionCenterName) return true;
-                                  if (sessionCenterId != null && String(sessionCenterId) === String(rescheduleCenter)) return true;
-                                  return !!selectedCenterForFilter && sessionCenterName === selectedCenterForFilter.name;
+                                  const centerId = s.raw?.test_center?.id ?? s.raw?.test_center_id ?? s.test_center?.id ?? s.test_center_id ?? null;
+                                  const hasCenterInfo = centerId != null || s.siteId != null || !!s.centerName;
+                                  // Targeted sessions are already scoped to the picked center
+                                  // server-side (test_center_id), so a row without center
+                                  // metadata is still the right center — trust it. Prometric
+                                  // rows always carry center info; a missing one is a leak.
+                                  if (!hasCenterInfo) return rescheduleSessionsSource !== 'prometric';
+                                  if (centerId != null && String(centerId) === String(rescheduleCenter)) return true;
+                                  if (String(s.siteId ?? '') === String(rescheduleCenter)) return true;
+                                  return !!selectedCenterForFilter && s.centerName === selectedCenterForFilter.name;
                                 });
                                 if (rescheduleLoadingSessions) {
                                   return (
@@ -1677,7 +1685,7 @@ export default function Home() {
                                                   {date && <span className="text-xs text-amber-400">{date}</span>}
                                                   {!time && !date && <span className="text-sm font-medium text-slate-400">Session #{idx + 1}</span>}
                                                 </div>
-                                                {(centerName || centerCity) && <div className="text-xs text-slate-500 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
+                                                {(centerName || centerCity) && <div className="text-xs font-medium text-amber-400/90 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
                                                 {!dateMatch && date && <div className="text-[10px] text-amber-400/70 mt-0.5">This session&apos;s date differs from selected</div>}
                                               </div>
                                               <div className="flex items-center gap-2 shrink-0">
@@ -1771,6 +1779,11 @@ export default function Home() {
                                 const selectedCenter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
                                 console.log('[reschedule] Building payload...', { newDate: rescheduleNewDate, testCenterId: rescheduleCenter, examSessionId, languageCode: rescheduleLanguage });
                                 if (!examSessionId) { setError('Please select an available session from the list. The center that gets assigned is the center of this session.'); return; }
+                                if (!selectedSessionData) { setError('The selected session is no longer in the session list. Reload sessions and pick again before submitting.'); return; }
+                                if (selectedCenter && selectedSessionData.centerName && selectedSessionData.centerName !== selectedCenter.name) {
+                                  setError(`Blocked: the selected session belongs to "${selectedSessionData.centerName}", not "${selectedCenter.name}". Reload the session list before submitting.`);
+                                  return;
+                                }
                                 const body = {
                                   sessionId: sid,
                                   newDate: rescheduleNewDate,
@@ -1792,7 +1805,7 @@ export default function Home() {
                                 console.log('[reschedule] PAYLOAD PREVIEW:', JSON.stringify(body, null, 2));
                                 setPendingPayload(body);
                                 setShowPayloadPreview(true);
-                              }} disabled={!rescheduleNewDate || !rescheduleCategory || !rescheduleSelectedSessionId}
+                              }} disabled={!rescheduleNewDate || !rescheduleCategory || !rescheduleCenter || !rescheduleSelectedSessionId}
                                 className="flex-[2] py-2 bg-amber-600 hover:bg-amber-500 disabled:bg-white/[0.06] disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
                                 Review Payload
                               </button>
@@ -1867,7 +1880,7 @@ export default function Home() {
                                 <option value="">{rescheduleLoadingCenters ? 'Loading centers...' : '-- Select Center --'}</option>
                                 {rescheduleCenters.map((c) => <option key={c.id} value={c.id}>{c.name}{c.city ? ` - ${c.city}` : ''}</option>)}
                               </select>
-                              <p className="mt-1 text-[10px] text-slate-500">Center {rescheduleCenter ? `#${rescheduleCenter}` : ''} (city {rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter))?.city || ''}) scopes the dates and sessions shown; the session you pick is the one SVPI books.</p>
+                              <p className="mt-1 text-[10px] text-slate-500">The center id you pick ({rescheduleCenter || 'none yet'}) is sent to SVPI as test_center_id. Only sessions of this exact center are shown and booked.</p>
                             </div>
                           )}
                           {rescheduleCenter && (
@@ -1909,9 +1922,11 @@ export default function Home() {
                                         const sessionId = s.id || idx;
                                         const isSelected = rebookExamSessionId === String(sessionId);
                                         const time = s.time || '';
+                                        const date = s.date || '';
                                         const centerName = s.centerName || '';
                                         const centerCity = s.city || '';
                                         const slots = s.seats ?? '';
+                                        const dateMatch = date && rescheduleNewDate ? toIsoDate(date) === toIsoDate(rescheduleNewDate) : true;
                                         return (
                                           <button key={sessionId || idx} type="button" onClick={() => { setRebookExamSessionId(isSelected ? '' : String(sessionId)); }}
                                             className={`w-full text-left p-3 rounded-xl border transition-all ${isSelected ? 'bg-emerald-600/20 border-emerald-500/50 ring-1 ring-emerald-500/30' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06]'}`}>
@@ -1919,9 +1934,11 @@ export default function Home() {
                                               <div className="min-w-0">
                                                 <div className="flex items-center gap-2 flex-wrap">
                                                   {time && <span className="text-sm font-medium text-white">{time}</span>}
-                                                  {!time && <span className="text-sm font-medium text-slate-400">Session #{idx + 1}</span>}
+                                                  {date && <span className="text-xs text-emerald-400">{date}</span>}
+                                                  {!time && !date && <span className="text-sm font-medium text-slate-400">Session #{idx + 1}</span>}
                                                 </div>
-                                                {(centerName || centerCity) && <div className="text-xs text-slate-500 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
+                                                {(centerName || centerCity) && <div className="text-xs font-medium text-amber-400/90 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
+                                                {!dateMatch && date && <div className="text-[10px] text-amber-400/70 mt-0.5">This session&apos;s date differs from selected</div>}
                                               </div>
                                               <div className="flex items-center gap-2 shrink-0">
                                                 {slots !== '' && slots !== null && <span className="text-[10px] text-slate-500">{slots} seats</span>}
@@ -1937,10 +1954,11 @@ export default function Home() {
                                   );
                                 } else {
                                   const rebookCityName = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter))?.city || rescheduleCities.find(c => c.id === rescheduleCity)?.name || '';
+                                  const rebookCenterName = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter))?.name || '';
                                   return (
                                     <div className="text-xs text-slate-500 py-2">
                                       {rescheduleCenter
-                                        ? `No sessions available${rebookCityName ? ` in ${rebookCityName}` : ''} on this date. Try a different date.`
+                                        ? `No sessions available at ${rebookCenterName || `center #${rescheduleCenter}`} on this date. Try a different date or center.`
                                         : 'No sessions found for this date. Try a different date or city.'}
                                     </div>
                                   );
@@ -1990,6 +2008,11 @@ export default function Home() {
                                 if (!rebookLanguage) { setError('Please select a language.'); return; }
                                 const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
                                 const selectedCenter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
+                                if (!selectedSessionData) { setError('The selected session is no longer in the session list. Reload sessions and pick again before submitting.'); return; }
+                                if (selectedCenter && selectedSessionData.centerName && selectedSessionData.centerName !== selectedCenter.name) {
+                                  setError(`Blocked: the selected session belongs to "${selectedSessionData.centerName}", not "${selectedCenter.name}". Reload the session list before submitting.`);
+                                  return;
+                                }
                                 const body = {
                                   categoryId: rescheduleCategory,
                                   occupationId,
@@ -2003,7 +2026,8 @@ export default function Home() {
                                   duration: selectedSessionData?.duration ?? null,
                                   startAt: selectedSessionData?.startAt || null,
                                   testCenter: selectedCenter?.name || selectedSessionData?.centerName || '',
-                                  sessionTime: selectedSessionData?.time || ''
+                                  sessionTime: selectedSessionData?.time || '',
+                                  sessionsSource: rebookSessionsSource
                                 };
                                 setPendingPayload({ ...body, _rebook: true });
                                 setShowPayloadPreview(true);

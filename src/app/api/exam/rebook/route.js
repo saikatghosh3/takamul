@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { isLoggedIn, rebookViaAPI } from '@/lib/svp-playwright';
+import { fetchExamSessions } from '@/lib/takamol';
 
 export const dynamic = 'force-dynamic';
 
@@ -12,7 +13,7 @@ export async function POST(request) {
       );
     }
 
-    const { categoryId, occupationId, cityName, newDate, examSessionId, languageCode, methodology, siteId, siteCity, duration, startAt } = await request.json();
+    const { categoryId, occupationId, cityName, newDate, examSessionId, languageCode, methodology, siteId, siteCity, duration, startAt, sessionsSource } = await request.json();
 
     if (!examSessionId) {
       return NextResponse.json(
@@ -52,6 +53,32 @@ export async function POST(request) {
     console.log(`║  startAt:       ${startAt}`);
     console.log('╚═══════════════════════════════════════════════════════════');
     console.log('');
+
+    // Pre-post safety check: confirm the picked exam session really belongs to
+    // the selected center BEFORE anything is posted to SVPI. exam_sessions is
+    // scoped by test_center_id (verified live: each center returns a disjoint
+    // token set), so a session missing from the center-scoped list cannot be
+    // that center's session. siteId is the selected center id from the UI.
+    // Only enforced for the targeted source — prometric slot ids are different
+    // tokens and would false-negative, so they are pinned at fetch time instead.
+    if (sessionsSource !== 'prometric' && siteId) {
+      try {
+        const verify = await fetchExamSessions(categoryId, newDate, cityName, siteId);
+        const scopedIds = (verify.sessions || []).map(s => String(s.id || s.exam_session_id || s.exam_session?.id));
+        if (scopedIds.length > 0 && !scopedIds.includes(String(examSessionId))) {
+          console.warn(`[exam/rebook] SAFETY BLOCK: exam_session_id ${examSessionId} not in center ${siteId} scoped list (${scopedIds.length} sessions). Refusing to post.`);
+          return NextResponse.json(
+            {
+              success: false,
+              error: `Safety check: the selected session does not belong to the chosen center (center id ${siteId}). Refusing to post. Reload sessions and pick a session listed under that center.`
+            },
+            { status: 409 }
+          );
+        }
+      } catch (e) {
+        console.warn(`[exam/rebook] Safety verify failed (continuing): ${e.message}`);
+      }
+    }
 
     const result = await rebookViaAPI({
       occupationId: occupationId ?? categoryId,
