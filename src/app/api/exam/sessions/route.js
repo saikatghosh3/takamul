@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { isLoggedIn, authenticatedFetch, logout } from '@/lib/svp-playwright';
+import { isLoggedIn, authenticatedFetch } from '@/lib/svp-playwright';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,7 +27,9 @@ export async function GET(request) {
 
     if (!res.ok) {
       if (res.status === 401) {
-        logout();
+        // Do NOT wipe the persisted session here: a transient 401 (token
+        // rotation) is recoverable via the browser refresh path, and the stored
+        // token lets the next request self-heal. Just tell the client to re-login.
         return NextResponse.json(
           { success: false, error: 'Session expired. Please login again.', expired: true },
           { status: 401 }

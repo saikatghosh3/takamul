@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getToken, isLoggedIn, logout } from '@/lib/svp-playwright';
+import { getToken, isLoggedIn } from '@/lib/svp-playwright';
 
 export const dynamic = 'force-dynamic';
 
@@ -44,7 +44,8 @@ export async function POST(request) {
 
     if (!res.ok) {
       if (res.status === 401) {
-        logout();
+        // Do NOT wipe the persisted session (see exam/sessions route): keep the
+        // token so the refresh path can self-heal on the next request.
         return NextResponse.json(
           { success: false, error: 'Session expired. Please login again.', expired: true },
           { status: 401 }

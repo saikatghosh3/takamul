@@ -17,8 +17,13 @@ export async function POST(request) {
     // reservation's category.prometric_codes, keeping only codes whose
     // non_targeted flag matches the user (targeted user -> non_targeted === false)
     // and whose question_count matches the exam type (15 for this labor flow).
+    // Keep only prometric-engine codes. The category's prometric_codes list also
+    // contains tep-engine rows whose `code` is a UUID (not a real prometric code);
+    // sending one of those as language_code to the reschedule API fails or books
+    // the wrong language. This mirrors the frontend's prometricLanguagesForCategory.
     const codes = (reservation.category?.prometric_codes || []).filter(
-      (c) => c?.non_targeted === false
+      (c) => c?.non_targeted === false &&
+        (c?.exam_engine_id === 1 || c?.exam_engine_name === 'prometric')
     );
     const langOfRes = codes.find((c) => c.language_code === reservation.language_code);
     const questionCount = langOfRes?.question_count || 15;

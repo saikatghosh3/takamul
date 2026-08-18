@@ -39,6 +39,24 @@ export async function fetchCategories() {  const cacheKey = 'categories';
   return result;
 }
 
+// SVP's individual_labor_space APIs filter `city` case-sensitively ("cumilla"
+// -> 0 rows, "Cumilla" -> 48). The UI sends lowercase slugs, so look up the
+// proper display casing from the category's city list. Falls back to the raw
+// input (already-proper casing, or a slug SVP accepts) if no match is found.
+export async function resolveCityCase(categoryId, city) {
+  const requested = String(city || '').toLowerCase();
+  if (!requested) return city || '';
+  try {
+    const cities = await fetchCities(categoryId);
+    const match = (cities || []).find(c => {
+      const name = typeof c === 'string' ? c : (c.city || c.name || c.english_name);
+      return name && name.toLowerCase() === requested;
+    });
+    if (match) return typeof match === 'string' ? match : (match.city || match.name || match.english_name);
+  } catch { /* fall through to raw input */ }
+  return city || '';
+}
+
 export async function fetchAvailableDates(categoryId, city) {
   const token = getToken();
   if (!token) throw new Error('Not authenticated. Please login first.');
@@ -52,7 +70,12 @@ export async function fetchAvailableDates(categoryId, city) {
     country_id: String(BANGLADESH_ID),
     per_page: '10000'
   });
-  if (city) params.set('city', city);
+  // SVP's city filter is CASE-SENSITIVE ("cumilla" -> 0 rows, "Cumilla" -> 48).
+  // The UI sends lowercase slugs, so resolve the proper display casing from the
+  // category's city list before querying.
+  if (city) {
+    params.set('city', resolveCityCase(categoryId, city));
+  }
 
   const url = `${API_BASE}/individual_labor_space/exam_sessions/available_dates?${params.toString()}`;
   const res = await authenticatedFetch(url);
@@ -135,12 +158,12 @@ export async function fetchExamSessions(categoryId, testDate, city, testCenterId
   });
   // SVPI's wizard (chunk 7083/8189 getSessions) queries exam_sessions with
   // exam_date + city + category_id (+ available_seats); reschedule additionally
-  // passes reservation_id. test_center_id narrows the returned sessions to the
-  // exact center the user picked — SVPI returns a DIFFERENT exam_session token
-  // set per test_center_id (verified live: center 62 vs 203 yield different
-  // tokens, for both the fresh and the reservation_id query). Without it the
-  // city-scoped list mixes sessions from every center in the city, which is why
-  // the old rebook booked at a different center than the one the user selected.
+  // passes reservation_id. test_center_id is sent when known, BUT it does NOT
+  // reliably scope the returned tokens to that center: verified live 2026-08-15
+  // a query scoped to center 174 returned a token that SVPI assigned to center
+  // 62 (Cumilla TTC). The response rows carry no center id/name either. So do
+  // NOT trust the scoped list to select a center — the caller must verify the
+  // assigned center after booking (see /api/exam/reschedule and /api/exam/rebook).
   if (testDate) params.set('exam_date', testDate);
   if (city) params.set('city', city);
   if (testCenterId) params.set('test_center_id', String(testCenterId));
@@ -224,7 +247,8 @@ export async function fetchRescheduleAvailableDates(reservationId, categoryId) {
     category_id: String(categoryId),
     start_at_date_from: startFrom,
     available_seats: 'greater_than::0',
-    status: 'scheduled'
+    status: 'scheduled',
+    per_page: '10000'
   });
   const url = `${API_BASE}/individual_labor_space/exam_sessions/available_dates?${params.toString()}`;
   console.log(`[takamol] fetchRescheduleAvailableDates: ${url}`);
@@ -236,6 +260,55 @@ export async function fetchRescheduleAvailableDates(reservationId, categoryId) {
 
   const rawDates = data.available_dates || data.dates || data.data || [];
   return { available_dates: rawDates };
+}
+
+// Resolves the targeted prometric exam codes (e.g. OFFBB, OFFEE) for a category
+// from individual_labor_space/occupations. Only codes that are targeted and run
+// on the prometric engine are returned — those are the real bookable exams, and
+// sites_availabilities must be queried per code to get the true per-center set.
+export async function fetchPrometricCodesForCategory(categoryId) {
+  const token = getToken();
+  if (!token) throw new Error('Not authenticated. Please login first.');
+
+  const cacheKey = `prometric-codes:${categoryId}`;
+  const cached = getCached(cacheKey);
+  if (cached) return cached;
+
+  const codes = new Set();
+  let page = 1;
+  let totalPages = 1;
+  while (page <= totalPages && page <= 10) {
+    const params = new URLSearchParams({
+      per_page: '237',
+      page: String(page),
+      locale: 'en'
+    });
+    const url = `${API_BASE}/individual_labor_space/occupations?${params.toString()}`;
+    console.log(`[takamol] fetchPrometricCodesForCategory: ${url}`);
+    const res = await authenticatedFetch(url);
+    if (!res.ok) throw new Error(`Failed to fetch occupations: ${res.status}`);
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    const occs = data.occupations || [];
+    for (const o of occs) {
+      const catId = o.category_id ?? o.category?.id;
+      if (String(catId) !== String(categoryId)) continue;
+      const engineCodes = o.category?.exam_engine_codes || o.category?.prometric_codes || [];
+      for (const pc of engineCodes) {
+        if (pc && pc.code && !pc.non_targeted && String(pc.exam_engine_name).toLowerCase() === 'prometric') {
+          codes.add(pc.code);
+        }
+      }
+    }
+    totalPages = data.pagination?.pages || 1;
+    page++;
+  }
+
+  const result = [...codes];
+  console.log(`[takamol] fetchPrometricCodesForCategory(${categoryId}) -> ${result.length} codes: ${result.join(', ')}`);
+  setCache(cacheKey, result, 30 * 60 * 1000);
+  return result;
 }
 
 export async function fetchPrometricSites({ prometricCode, city, startDate, endDate }) {

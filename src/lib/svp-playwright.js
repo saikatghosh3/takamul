@@ -871,9 +871,12 @@ export async function peekSessionTime({ occupationId, examSessionId, languageCod
 
 // ─── Cleanup ────────────────────────────────────────────────────
 
+// Close the managed browser but KEEP the persisted token/session files:
+// wiping them here (on server restart / SIGINT) is what made the SVP session
+// silently die on every dev-server restart. A stale token is recoverable via
+// the browser refresh path; an empty token file requires a full re-login.
 export async function shutdownAuth() {
   await closeManagedBrowser();
-  doLogout();
 }
 
 process.on('SIGTERM', shutdownAuth);

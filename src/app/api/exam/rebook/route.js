@@ -1,8 +1,28 @@
 import { NextResponse } from 'next/server';
-import { isLoggedIn, rebookViaAPI } from '@/lib/svp-playwright';
-import { fetchExamSessions } from '@/lib/takamol';
+import { isLoggedIn, rebookViaAPI, cancelViaAPI } from '@/lib/svp-playwright';
+import { fetchExamSessions, fetchReservation } from '@/lib/takamol';
 
 export const dynamic = 'force-dynamic';
+
+function centerIdOf(testCenter) {
+  if (!testCenter) return null;
+  const id = testCenter.id ?? testCenter.test_center_id;
+  return id == null ? null : String(id);
+}
+
+function centerNameOf(testCenter) {
+  if (!testCenter) return null;
+  return testCenter.test_center_name || testCenter.name || null;
+}
+
+// Loose match for center names: SVPI returns "Cumilla Technical Training
+// Centre", t2hub returns the same, but spacing/case/punctuation can vary.
+function normName(s) {
+  return String(s || '')
+    .toLowerCase()
+    .replace(/[^\w\d]+/g, ' ')
+    .trim();
+}
 
 export async function POST(request) {
   try {
@@ -13,7 +33,7 @@ export async function POST(request) {
       );
     }
 
-    const { categoryId, occupationId, cityName, newDate, examSessionId, languageCode, methodology, siteId, siteCity, duration, startAt, sessionsSource } = await request.json();
+    const { categoryId, occupationId, cityName, newDate, examSessionId, languageCode, methodology, siteId, siteCity, duration, startAt, sessionsSource, testCenterName } = await request.json();
 
     if (!examSessionId) {
       return NextResponse.json(
@@ -49,31 +69,26 @@ export async function POST(request) {
     console.log(`║  methodology:   ${methodology}`);
     console.log(`║  siteId:        ${siteId}`);
     console.log(`║  siteCity:      ${siteCity}`);
+    console.log(`║  testCenterName:${testCenterName || '(none)'}`);
     console.log(`║  duration:      ${duration}`);
     console.log(`║  startAt:       ${startAt}`);
     console.log('╚═══════════════════════════════════════════════════════════');
     console.log('');
 
-    // Pre-post safety check: confirm the picked exam session really belongs to
-    // the selected center BEFORE anything is posted to SVPI. exam_sessions is
-    // scoped by test_center_id (verified live: each center returns a disjoint
-    // token set), so a session missing from the center-scoped list cannot be
-    // that center's session. siteId is the selected center id from the UI.
-    // Only enforced for the targeted source — prometric slot ids are different
-    // tokens and would false-negative, so they are pinned at fetch time instead.
+    // NOTE (verified live 2026-08-15): this pre-post check is a WARNING ONLY,
+    // not a block. test_center_id does NOT reliably scope exam_sessions to one
+    // center — a query scoped to center 174 returned a token that SVPI assigned
+    // to center 62. So a token missing/extra in the scoped list proves nothing,
+    // and blocking on it would both allow wrong bookings and refuse correct
+    // ones. The authoritative guard is the POST-BOOKING verification below,
+    // which reads the new reservation back from SVPI and compares its assigned
+    // test center against the requested center (siteId), cancelling on mismatch.
     if (sessionsSource !== 'prometric' && siteId) {
       try {
         const verify = await fetchExamSessions(categoryId, newDate, cityName, siteId);
         const scopedIds = (verify.sessions || []).map(s => String(s.id || s.exam_session_id || s.exam_session?.id));
         if (scopedIds.length > 0 && !scopedIds.includes(String(examSessionId))) {
-          console.warn(`[exam/rebook] SAFETY BLOCK: exam_session_id ${examSessionId} not in center ${siteId} scoped list (${scopedIds.length} sessions). Refusing to post.`);
-          return NextResponse.json(
-            {
-              success: false,
-              error: `Safety check: the selected session does not belong to the chosen center (center id ${siteId}). Refusing to post. Reload sessions and pick a session listed under that center.`
-            },
-            { status: 409 }
-          );
+          console.warn(`[exam/rebook] WARNING: exam_session_id ${examSessionId} not in center ${siteId} scoped list (${scopedIds.length} sessions). Proceeding — the post-booking check will catch a wrong center.`);
         }
       } catch (e) {
         console.warn(`[exam/rebook] Safety verify failed (continuing): ${e.message}`);
@@ -101,22 +116,84 @@ export async function POST(request) {
       const hasRealReservation = !!(reservation && (reservation.id || reservation.reservation_id || reservation.reservationId));
       console.log(`[exam/rebook] Success: ${result.status} hasRealReservation=${hasRealReservation}`);
       if (hasRealReservation) {
-        const examSession = reservation.exam_session || {};
+        const reservationId = reservation.id || reservation.reservation_id || reservation.reservationId;
+
+        // POST-BOOKING VERIFICATION: read the new reservation back from SVPI
+        // and confirm the assigned test center matches the one the user picked.
+        // exam_sessions rows carry no center id and the test_center_id filter is
+        // known to leak other centers, so this read-back is the only reliable
+        // signal. On mismatch the fresh reservation is cancelled immediately.
+        let fresh = null;
+        try {
+          fresh = await fetchReservation(reservationId);
+        } catch (e) {
+          console.warn(`[exam/rebook] Post-booking read failed (continuing): ${e.message}`);
+        }
+        const freshRes = fresh?.exam_reservation || fresh || reservation;
+        const assignedCenterId = centerIdOf(freshRes?.test_center);
+        const requestedCenterId = siteId == null ? null : String(siteId);
+        const assignedCenterName = centerNameOf(freshRes?.test_center);
+        const requestedCenterName = testCenterName || null;
+
+        // Match if both id (when provided) and name (when provided) agree.
+        const idMismatch = assignedCenterId && requestedCenterId && assignedCenterId !== requestedCenterId;
+        const nameMismatch = requestedCenterName && assignedCenterName && normName(assignedCenterName) !== normName(requestedCenterName);
+
+        if (idMismatch || nameMismatch) {
+          console.error(`[exam/rebook] CENTER MISMATCH: assigned center ${assignedCenterId} (${assignedCenterName || '?'}), requested ${requestedCenterId || requestedCenterName || '?'}. Cancelling reservation ${reservationId}.`);
+          let cancel = null;
+          try {
+            const cancelRes = await cancelViaAPI(reservationId, 'Wrong test center assigned by SVPI');
+            cancel = { attempted: true, ok: !!cancelRes.ok, status: cancelRes.status, error: cancelRes.ok ? null : (cancelRes.data?.message || cancelRes.data?.error || 'Cancel failed') };
+          } catch (e) {
+            cancel = { attempted: true, ok: false, error: e.message };
+          }
+          console.error(`[exam/rebook] Cancel result: ${JSON.stringify(cancel)}`);
+          return NextResponse.json(
+            {
+              success: false,
+              error: `SVPI assigned the new reservation to center #${assignedCenterId || '?'} (${assignedCenterName || 'unknown'}), not the selected center ${requestedCenterId ? `#${requestedCenterId}` : `"${requestedCenterName || 'unknown'}"`}. ${cancel?.ok ? 'The wrong-center reservation was cancelled. No new booking remains.' : 'The wrong-center reservation could NOT be cancelled — check SVPI and cancel it manually.'}`,
+              data: {
+                assignedCenterId,
+                requestedCenterId,
+                requestedCenterName,
+                assignedCenterName,
+                reservationId,
+                status: freshRes.reservation_status || reservation.reservation_status,
+                cancel
+              }
+            },
+            { status: 409 }
+          );
+        }
+
+        console.log(`[exam/rebook] Center verified: assigned ${assignedCenterId || 'unknown'} (${assignedCenterName || '?'}) vs requested ${requestedCenterId || requestedCenterName || 'n/a'}`);
+        const examSession = freshRes.exam_session || reservation.exam_session || {};
         const testDateTime = examSession.start_at_in_tc_time_zone || examSession.start_at || '';
         const testDate = examSession.test_date || String(testDateTime).split(' ')[0] || undefined;
         const testTime = examSession.test_time || String(testDateTime).split(' ')[1] || undefined;
+        const centerSource = freshRes.test_center || reservation.test_center;
         const responseData = {
           message: 'Rebooked successfully',
-          reservationId: reservation.id || reservation.reservation_id || reservation.reservationId,
-          status: reservation.reservation_status || reservation.status,
+          reservationId,
+          status: freshRes.reservation_status || reservation.reservation_status || reservation.status,
           testDate,
           testTime,
-          center: reservation.test_center ? {
-            id: reservation.test_center.id || reservation.test_center.test_center_id,
-            name: reservation.test_center.test_center_name || reservation.test_center.name,
-            city: reservation.test_center.test_center_city || reservation.test_center.city,
-            address: reservation.test_center.test_center_address || reservation.test_center.address
-          } : null
+          testTimeInTc: examSession.start_at_in_tc_time_zone || undefined,
+          center: centerSource ? {
+            id: centerSource.id || centerSource.test_center_id,
+            name: centerSource.test_center_name || centerSource.name,
+            city: centerSource.test_center_city || centerSource.city,
+            address: centerSource.test_center_address || centerSource.address
+          } : null,
+          verified: {
+            assignedCenterId,
+            requestedCenterId,
+            assignedCenterName,
+            requestedCenterName,
+            matches: (requestedCenterId ? assignedCenterId === requestedCenterId : true) &&
+                     (requestedCenterName ? normName(assignedCenterName) === normName(requestedCenterName) : true)
+          }
         };
         return NextResponse.json({ success: true, data: responseData });
       }
