@@ -353,6 +353,7 @@ export default function Home() {
   const [rescheduleCategorySearch, setRescheduleCategorySearch] = useState('');
   const [rescheduleShowCategoryDropdown, setRescheduleShowCategoryDropdown] = useState(false);
   const [rebookCategorySearch, setRebookCategorySearch] = useState('');
+  const [rebookShowCategoryDropdown, setRebookShowCategoryDropdown] = useState(false);
 
   const [availableSessions, setAvailableSessions] = useState({});
 
@@ -416,6 +417,19 @@ export default function Home() {
   const [rebookLoadingSessions, setRebookLoadingSessions] = useState(false);
   const [rebookSessionsSource, setRebookSessionsSource] = useState('none');
 
+  const [rebookCategory, setRebookCategory] = useState('');
+  const [rebookCity, setRebookCity] = useState('');
+  const [rebookCities, setRebookCities] = useState([]);
+  const [rebookCenters, setRebookCenters] = useState([]);
+  const [rebookCenter, setRebookCenter] = useState('');
+  const [rebookNewDate, setRebookNewDate] = useState('');
+  const [rebookAllDatesRaw, setRebookAllDatesRaw] = useState([]);
+  const [rebookAvailableDates, setRebookAvailableDates] = useState([]);
+  const [rebookDateSource, setRebookDateSource] = useState('none');
+  const [rebookLoadingDates, setRebookLoadingDates] = useState(false);
+  const [rebookLoadingCities, setRebookLoadingCities] = useState(false);
+  const [rebookLoadingCenters, setRebookLoadingCenters] = useState(false);
+
   const [rescheduleSelected, setRescheduleSelected] = useState(null);
   const [cancelSelected, setCancelSelected] = useState(null);
 
@@ -468,8 +482,26 @@ export default function Home() {
     setRebookSelected(null);
     setRebookResult(null);
     setRebookExamSessionId('');
-    setRebookLanguage('en');
+    setRebookLanguage('');
+    setRebookLanguages([]);
     setRebookAvailableSessions([]);
+    setRebookLoadingSessions(false);
+    setRebookCategory('');
+    setRebookCategorySearch('');
+    setRebookShowCategoryDropdown(false);
+    setRebookCity('');
+    setRebookCities([]);
+    setRebookCenters([]);
+    setRebookCenter('');
+    setRebookNewDate('');
+    setRebookAllDatesRaw([]);
+    setRebookAvailableDates([]);
+    setRebookDateSource('none');
+    setRebookLoadingDates(false);
+    setRebookLoadingCities(false);
+    setRebookLoadingCenters(false);
+    setRebookSessionsSource('none');
+    setRebookT2hubCenters([]);
     setExamResults(null);
     setResultsError('');
     setTickets(null);
@@ -604,6 +636,41 @@ export default function Home() {
   }, [rescheduleReservationId]);
 
   useEffect(() => {
+    if (!rebookCategory) return;
+    let cancelled = false;
+    async function loadRebookCitiesAndDates() {
+      setRebookLoadingCities(true);
+      setRebookLoadingDates(true);
+      setRebookCities([]);
+      setRebookCity('');
+      setRebookAllDatesRaw([]);
+      setRebookAvailableDates([]);
+      setRebookDateSource('none');
+      setRebookNewDate('');
+      setRebookCenters([]);
+      setRebookCenter('');
+      try {
+        const res = await fetch('/api/takamol/dates', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: rebookCategory })
+        });
+        const json = await res.json();
+        if (!cancelled && json.success) {
+          setRebookCities(json.data.cities || []);
+          setRebookAllDatesRaw(json.raw_dates || []);
+          setRebookAvailableDates(json.data.dates || []);
+          setRebookDateSource(json.data.source || 'none');
+        }
+      } catch {} finally {
+        if (!cancelled) { setRebookLoadingCities(false); setRebookLoadingDates(false); }
+      }
+    }
+    loadRebookCitiesAndDates();
+    return () => { cancelled = true; };
+  }, [rebookCategory]);
+
+  useEffect(() => {
     if (!rescheduleCategory || !rescheduleCity) return;
     let cancelled = false;
     async function loadCenters() {
@@ -626,6 +693,30 @@ export default function Home() {
     loadCenters();
     return () => { cancelled = true; };
   }, [rescheduleCategory, rescheduleCity, rescheduleCities]);
+
+  useEffect(() => {
+    if (!rebookCategory || !rebookCity) return;
+    let cancelled = false;
+    async function loadRebookCenters() {
+      setRebookLoadingCenters(true);
+      try {
+        const cityObj = rebookCities.find(c => c.id === rebookCity);
+        const cityName = cityObj ? cityObj.name : rebookCity;
+        const res = await fetch('/api/takamol/centers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ category: rebookCategory, city: cityName })
+        });
+        const json = await res.json();
+        if (!cancelled && json.success) {
+          setRebookCenters(json.data.centers || []);
+          setRebookCenter('');
+        }
+      } catch {} finally { if (!cancelled) setRebookLoadingCenters(false); }
+    }
+    loadRebookCenters();
+    return () => { cancelled = true; };
+  }, [rebookCategory, rebookCity, rebookCities]);
 
   useEffect(() => {
     let cancelled = false;
@@ -726,7 +817,7 @@ export default function Home() {
   useEffect(() => {
     let cancelled = false;
     async function loadRebookSessions() {
-      if (!rescheduleCategory || !rescheduleNewDate) {
+      if (!rebookCategory || !rebookNewDate) {
         setRebookAvailableSessions([]);
         setRebookExamSessionId('');
         setRebookSessionsSource('none');
@@ -739,24 +830,24 @@ export default function Home() {
       setRebookSessionsSource('none');
       setRebookT2hubCenters([]);
       try {
-        const cityObj = rescheduleCity ? rescheduleCities.find(c => c.id === rescheduleCity) : null;
+        const cityObj = rebookCity ? rebookCities.find(c => c.id === rebookCity) : null;
         const cityName = cityObj ? cityObj.name : undefined;
-        const selectedCenterObj = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
+        const selectedCenterObj = rebookCenters.find(c => String(c.id) === String(rebookCenter));
         const res = await fetch('/api/takamol/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            category: rescheduleCategory,
-            date: rescheduleNewDate,
+            category: rebookCategory,
+            date: rebookNewDate,
             city: cityName,
-            testCenterId: rescheduleCenter || undefined,
+            testCenterId: rebookCenter || undefined,
             prometricCode: rebookLanguage || undefined
           })
         });
         const json = await res.json();
         if (!cancelled && json.success) {
           const apiSessions = json.data.sessions || [];
-          const normalizedDate = rescheduleNewDate;
+          const normalizedDate = rebookNewDate;
           const sessionsForDate = apiSessions.map(s => {
             let time = s.test_time || s.start_time || s.time || s.time_slot || s.start_time_in_tc_time_zone || s.test_time_in_tc_time_zone || s.exam_session?.test_time || s.exam_session?.start_time || '';
             if (!time) {
@@ -792,8 +883,8 @@ export default function Home() {
             setRebookSessionsSource(json.data.source || 'targeted');
             const t2hubCenters = Array.isArray(json.data.centers) ? json.data.centers : [];
             setRebookT2hubCenters(t2hubCenters);
-            if (rescheduleCenter && t2hubCenters.length > 0 && !t2hubCenters.some(c => String(c.id) === String(rescheduleCenter))) {
-              setRescheduleCenter('');
+            if (rebookCenter && t2hubCenters.length > 0 && !t2hubCenters.some(c => String(c.id) === String(rebookCenter))) {
+              setRebookCenter('');
               setRebookExamSessionId('');
             }
           }
@@ -806,7 +897,7 @@ export default function Home() {
     }
     loadRebookSessions();
     return () => { cancelled = true; };
-  }, [rescheduleCategory, rescheduleNewDate, rescheduleCity, rescheduleCenter, rescheduleCenters, rescheduleCities, rebookLanguage]);
+  }, [rebookCategory, rebookNewDate, rebookCity, rebookCenter, rebookCenters, rebookCities, rebookLanguage]);
 
   const filteredCityDates = useMemo(() => {
     if (!selectedCategory || !selectedCity) return { dates: [], source: 'none' };
@@ -912,6 +1003,52 @@ export default function Home() {
 
   const rescheduleEffectiveAvailableDates = rescheduleCity ? rescheduleFilteredCityDates.dates : rescheduleAvailableDates;
   const rescheduleEffectiveDateSource = rescheduleCity ? rescheduleFilteredCityDates.source : rescheduleDateSource;
+
+  const rebookFilteredCityDates = useMemo(() => {
+    if (!rebookCategory || !rebookCity) return { dates: [], source: 'none' };
+    const cityObj = rebookCities.find(c => c.id === rebookCity);
+    if (!cityObj) return { dates: [], source: 'none' };
+    const cityName = cityObj.name;
+    const cityNameLower = cityName.toLowerCase();
+    const extractDateFromRaw = (d) => {
+      const raw = d.start_date_in_tc_time_zone || d.start_at_in_tc_time_zone || d.date || d.start_date || d.start_date_in_browser_time_zone;
+      if (!raw) return null;
+      const match = String(raw).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return match ? `${match[1]}-${match[2]}-${match[3]}` : null;
+    };
+    const extractCityFromRaw = (d) => {
+      return d.test_center?.city || d.city || d.test_center?.test_center_city || '';
+    };
+    const filteredDates = rebookAllDatesRaw
+      .filter(d => {
+        const itemCity = extractCityFromRaw(d);
+        return itemCity && itemCity.toLowerCase() === cityNameLower;
+      })
+      .map(d => extractDateFromRaw(d))
+      .filter(Boolean);
+    const uniqueDates = [...new Set(filteredDates)].sort();
+    return { dates: uniqueDates, source: uniqueDates.length > 0 ? 'api' : 'none' };
+  }, [rebookCategory, rebookCity, rebookCities, rebookAllDatesRaw]);
+
+  const rebookEffectiveAvailableDates = rebookCity ? rebookFilteredCityDates.dates : rebookAvailableDates;
+  const rebookEffectiveDateSource = rebookCity ? rebookFilteredCityDates.source : rebookDateSource;
+
+  const rebookCategories = useMemo(() => {
+    const session = rebookSelected?.session;
+    if (!session) return categories;
+    const sessionName = (session.category?.english_name || session.occupation?.english_name || '').trim();
+    if (!sessionName) return categories;
+    const found = categories.some(c => c.name === sessionName);
+    if (found) return categories;
+    const sessionId = session.category?.id || session.occupation?.id || session.category_id || session.occupation_id;
+    return [{ id: sessionId, name: sessionName }, ...categories];
+  }, [categories, rebookSelected?.session]);
+
+  const filteredRebookCategories = useMemo(() => {
+    if (!rebookCategorySearch) return rebookCategories;
+    const q = rebookCategorySearch.toLowerCase();
+    return rebookCategories.filter(cat => cat.name.toLowerCase().includes(q));
+  }, [rebookCategories, rebookCategorySearch]);
 
   const rescheduleCategories = useMemo(() => {
     const session = rescheduleSelected?.session;
@@ -1635,10 +1772,11 @@ export default function Home() {
                             <button onClick={() => {
                               if (rebookSelected?.id === sid) {
                                 setRebookSelected(null);
-                                setRescheduleCategory('');
+                                setRebookCategory('');
                                 setRebookCategorySearch('');
-                                setRescheduleCity('');
-                                setRescheduleNewDate('');
+                                setRebookCity('');
+                                setRebookNewDate('');
+                                setRebookCenter('');
                                 return;
                               }
                               const sessionName = (session.category?.english_name || session.occupation?.english_name || '').trim();
@@ -1655,11 +1793,11 @@ export default function Home() {
                               setRescheduleSelected(null);
                               setCancelSelected(null);
                               setRebookSelected({ id: sid, session });
-                              setRescheduleCategory(String(catId || ''));
+                              setRebookCategory(String(catId || ''));
                               setRebookCategorySearch(catName);
-                              setRescheduleCity('');
-                              setRescheduleCenter('');
-                              setRescheduleNewDate('');
+                              setRebookCity('');
+                              setRebookCenter('');
+                              setRebookNewDate('');
                               setRebookExamSessionId('');
                               setRebookLanguages(langs);
                               setRebookLanguage(currentLang?.code || langs[0]?.code || '');
@@ -1977,242 +2115,256 @@ export default function Home() {
                           </div>
                         </div>
                       )}
-                       {isRebooking && (
-                         <div className="space-y-3 border-t border-white/[0.06] px-5 pb-5 pt-4 mt-1">
-                          <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Category</label>
-                            <div className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm">{rebookCategorySearch || '—'}</div>
-                          </div>
-                          <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Occupation</label>
-                            <div className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm">{(rebookSelected?.session?.occupation?.english_name || rebookSelected?.session?.occupation?.name || '—').trim()}</div>
-                          </div>
-                          <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                              Language (SVPI prometric code) {rebookLanguages.length === 0 && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">from reservation category</span>}
-                            </label>
-                            <select value={rebookLanguage} onChange={(e) => { setRebookLanguage(e.target.value); setRebookExamSessionId(''); }} disabled={rebookLanguages.length === 0}
-                              className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
-                              <option value="">{rebookLanguages.length === 0 ? 'No languages available' : '-- Select Language --'}</option>
-                              {rebookLanguages.map((l) => <option key={l.id} value={l.code}>{l.english_name} ({l.code})</option>)}
-                            </select>
-                            <p className="mt-1 text-[10px] text-slate-500">SVPI must receive the prometric code (e.g. LOABB), not the ISO code (e.g. bn).</p>
-                          </div>
-                          <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                              City {rescheduleLoadingCities && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
-                            </label>
-                            <select value={rescheduleCity} onChange={(e) => { setRescheduleCity(e.target.value); setRescheduleCenter(''); setRescheduleNewDate(''); setRebookAvailableSessions([]); setRebookExamSessionId(''); }} disabled={!rescheduleCategory || rescheduleLoadingCities}
-                              className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
-                              <option value="">{!rescheduleCategory ? 'Select category first' : rescheduleLoadingCities ? 'Loading cities...' : '-- Select City --'}</option>
-                              {rescheduleCities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
-                            </select>
-                          </div>
-                          {rescheduleCity && rebookT2hubCenters.length > 0 && (
+                        {isRebooking && (
+                          <div className="space-y-3 border-t border-white/[0.06] px-5 pb-5 pt-4 mt-1">
+                           <div>
+                             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Category</label>
+                             <div className="relative">
+                               <div className="relative">
+                                 <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                                 <input type="text" value={rebookCategorySearch} onChange={(e) => { setRebookCategorySearch(e.target.value); setRebookShowCategoryDropdown(true); if (!e.target.value && rebookCategory) { setRebookCategory(''); setRebookCity(''); setRebookNewDate(''); setRebookCenter(''); setRebookCenters([]); setRebookAvailableSessions([]); setRebookExamSessionId(''); } }} onFocus={() => setRebookShowCategoryDropdown(true)} onBlur={() => setTimeout(() => setRebookShowCategoryDropdown(false), 200)} placeholder={rebookCategory ? rebookCategorySearch : 'Search categories...'} className="w-full pl-10 pr-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all placeholder:text-slate-500" />
+                                 {rebookCategorySearch && (
+                                   <button type="button" onClick={() => { setRebookCategorySearch(''); setRebookCategory(''); setRebookCity(''); setRebookNewDate(''); setRebookCenter(''); setRebookCenters([]); setRebookAvailableSessions([]); setRebookExamSessionId(''); setRebookShowCategoryDropdown(false); }} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors">
+                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                   </button>
+                                 )}
+                               </div>
+                               {rebookShowCategoryDropdown && (
+                                 <div className="absolute z-10 mt-1 w-full bg-[#111827] border border-white/[0.08] rounded-xl shadow-2xl shadow-black/40 max-h-60 overflow-y-auto">
+                                   {filteredRebookCategories.length > 0 ? filteredRebookCategories.slice(0, 50).map((cat, idx) => (
+                                     <button key={`${cat.id}-${idx}`} type="button" onMouseDown={(e) => { e.preventDefault(); setRebookCategory(cat.id); setRebookCategorySearch(cat.name); setRebookShowCategoryDropdown(false); setRebookCity(''); setRebookNewDate(''); setRebookCenter(''); setRebookCenters([]); setRebookAvailableSessions([]); setRebookExamSessionId(''); }}
+                                       className={`w-full text-left px-4 py-3 text-sm text-white hover:bg-white/[0.06] transition-colors border-b border-white/[0.06] last:border-b-0 ${rebookCategory === cat.id ? 'bg-emerald-500/15 text-emerald-300' : ''}`}>
+                                       {cat.name}
+                                     </button>
+                                   )) : (
+                                     <div className="px-4 py-3 text-sm text-slate-500">No categories found</div>
+                                   )}
+                                 </div>
+                               )}
+                             </div>
+                           </div>
                             <div>
                               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Exact Test Centers ({rebookT2hubCenters.length} on {rescheduleNewDate || 'selected date'})
-                              </label>
-                              <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                                {rebookT2hubCenters.map(center => {
-                                  const isSel = String(rescheduleCenter) === String(center.id);
-                                  return (
-                                    <button key={center.id} type="button" onClick={() => { setRescheduleCenter(String(center.id)); setRebookExamSessionId(''); }}
-                                      className={`w-full text-left p-3 rounded-xl border transition-all ${isSel ? 'bg-emerald-600/20 border-emerald-500/50 ring-1 ring-emerald-500/30' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06]'}`}>
-                                      <div className="flex items-center justify-between gap-2">
-                                        <div className="min-w-0">
-                                          <div className="text-sm font-medium text-white truncate">{center.full_name}</div>
-                                          <div className="text-[10px] text-slate-500">{center.city}{center.totalSeats != null ? ` · ${center.totalSeats} seats total` : ''}</div>
-                                        </div>
-                                        <div className="flex items-center gap-2 shrink-0">
-                                          <span className={`text-[10px] px-2 py-0.5 rounded-full ${center.available === true ? 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-300' : 'bg-white/[0.04] border border-white/[0.08] text-slate-400'}`}>
-                                            {center.available === true ? `Available · ${center.sessionsCount} session${center.sessionsCount === 1 ? '' : 's'}` : `${center.sessionsCount} session${center.sessionsCount === 1 ? '' : 's'}`}
-                                          </span>
-                                          <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSel ? 'border-emerald-400 bg-emerald-400' : 'border-white/[0.15]'}`}>
-                                            {isSel && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                              <p className="mt-1 text-[10px] text-slate-500">These are the exact centers with available sessions on this date. Pick one to see its sessions — the center shown is the one SVPI will assign.</p>
-                            </div>
-                          )}
-                          {rescheduleCity && rebookT2hubCenters.length === 0 && rescheduleCenters.length > 0 && (
-                            <div>
-                              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Test Center {rescheduleLoadingCenters && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
-                              </label>
-                              <select value={rescheduleCenter} onChange={(e) => { setRescheduleCenter(e.target.value); setRescheduleNewDate(''); setRebookExamSessionId(''); }} disabled={rescheduleLoadingCenters}
-                                className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
-                                <option value="">{rescheduleLoadingCenters ? 'Loading centers...' : '-- Select Center --'}</option>
-                                {rescheduleCenters.map((c) => <option key={c.id} value={c.id}>{c.name}{c.city ? ` - ${c.city}` : ''}</option>)}
-                              </select>
-                              <p className="mt-1 text-[10px] text-slate-500">The center id you pick ({rescheduleCenter || 'none yet'}) is sent to SVPI as test_center_id. SVPI does not reliably scope sessions to one center, so the assigned center is read back and verified after booking — a mismatch is auto-reverted/cancelled.</p>
-                            </div>
-                          )}
-                          {rescheduleCity && (
-                          <div>
-                            <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Exam Date</label>
-                            <Calendar value={rescheduleNewDate} onChange={(v) => { setRescheduleNewDate(v); setRebookExamSessionId(''); }} minDate={minDate} availableDates={rescheduleEffectiveAvailableDates} loading={rescheduleLoadingDates} source={rescheduleEffectiveDateSource} />
-                          </div>
-                          )}
-                          {rescheduleNewDate && (
-                            <div>
-                              <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-                                Available Session {rebookLoadingSessions && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
-                              </label>
-                              {rebookLoadingSessions ? (
-                                <div className="flex items-center gap-2 text-xs text-slate-500 py-2">
-                                  <div className="w-3 h-3 border-[1.5px] border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
-                                  Fetching available sessions...
-                                </div>
-                              ) : (() => {
-                                const selectedT2hubForFilter = rebookT2hubCenters.find(c => String(c.id) === String(rescheduleCenter));
-                                const selectedCenterForFilter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter)) || (selectedT2hubForFilter ? { name: selectedT2hubForFilter.full_name } : null);
-                                const filteredSessions = rebookAvailableSessions.filter(s => {
-                                  if (!rescheduleCenter) return true;
-                                  const centerId = s.raw?.test_center?.id ?? s.raw?.test_center_id ?? s.test_center?.id ?? s.test_center_id ?? null;
-                                  const hasCenterInfo = centerId != null || s.siteId != null || !!s.centerName;
-                                  // Targeted sessions are already scoped to the picked center
-                                  // server-side (test_center_id), so a row without center
-                                  // metadata is still the right center — trust it. Prometric
-                                  // rows always carry center info; a missing one is a leak.
-                                  if (!hasCenterInfo) return rebookSessionsSource !== 'prometric';
-                                  if (centerId != null && String(centerId) === String(rescheduleCenter)) return true;
-                                  if (String(s.siteId ?? '') === String(rescheduleCenter)) return true;
-                                  return !!selectedCenterForFilter && s.centerName === selectedCenterForFilter.name;
-                                });
-                                const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
-                                if (filteredSessions.length > 0) {
-                                  return (
-                                    <div className="space-y-1.5 max-h-48 overflow-y-auto">
-                                      {filteredSessions.map((s, idx) => {
-                                        const sessionId = s.id || idx;
-                                        const isSelected = rebookExamSessionId === String(sessionId);
-                                        const time = s.time ? formatSessionTime(s.raw || s) : '';
-                                        const date = s.date || '';
-                                        const centerName = s.centerName || '';
-                                        const centerCity = s.city || '';
-                                        const slots = s.seats ?? '';
-                                        const dateMatch = date && rescheduleNewDate ? toIsoDate(date) === toIsoDate(rescheduleNewDate) : true;
-                                        return (
-                                          <button key={sessionId || idx} type="button" onClick={() => { setRebookExamSessionId(isSelected ? '' : String(sessionId)); }}
-                                            className={`w-full text-left p-3 rounded-xl border transition-all ${isSelected ? 'bg-emerald-600/20 border-emerald-500/50 ring-1 ring-emerald-500/30' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06]'}`}>
-                                            <div className="flex items-center justify-between">
-                                              <div className="min-w-0">
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                  {time && <span className="text-sm font-medium text-white">{time}</span>}
-                                                  {date && <span className="text-xs text-emerald-400">{date}</span>}
-                                                  {!time && !date && <span className="text-sm font-medium text-slate-400">Session #{idx + 1}</span>}
-                                                </div>
-                                                {(centerName || centerCity) && <div className="text-xs font-medium text-amber-400/90 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
-                                                {!dateMatch && date && <div className="text-[10px] text-amber-400/70 mt-0.5">This session&apos;s date differs from selected</div>}
-                                              </div>
-                                              <div className="flex items-center gap-2 shrink-0">
-                                                {slots !== '' && slots !== null && <span className="text-[10px] text-slate-500">{slots} seats</span>}
-                                                <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-emerald-400 bg-emerald-400' : 'border-white/[0.15]'}`}>
-                                                  {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </button>
-                                        );
-                                      })}
-                                    </div>
-                                  );
-                                } else {
-                                  const rebookCityName = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter))?.city || rebookT2hubCenters.find(c => String(c.id) === String(rescheduleCenter))?.city || rescheduleCities.find(c => c.id === rescheduleCity)?.name || '';
-                                  const rebookCenterName = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter))?.name || rebookT2hubCenters.find(c => String(c.id) === String(rescheduleCenter))?.full_name || '';
-                                  return (
-                                    <div className="text-xs text-slate-500 py-2">
-                                      {rescheduleCenter
-                                        ? `No sessions available at ${rebookCenterName || `center #${rescheduleCenter}`} on this date. Try a different date or center.`
-                                        : 'No sessions found for this date. Try a different date or city.'}
-                                    </div>
-                                  );
-                                }
-                              })()}
-                            </div>
-                          )}
-                          {showPayloadPreview && pendingPayload && pendingPayload._rebook ? (
-                            <div className="w-full space-y-3">
-                              <div className="p-3 bg-white/[0.04] border border-emerald-500/30 rounded-xl">
-                                <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Payload Preview — Exact data sent to SVPI</div>
-                                <pre className="text-xs text-slate-300 bg-black/30 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">{JSON.stringify(pendingPayload, null, 2)}</pre>
-                              </div>
-                              <div className="flex gap-2">
-                                <button onClick={() => { setShowPayloadPreview(false); setPendingPayload(null); }} className="flex-1 py-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-xl text-slate-400 text-xs border border-white/[0.08] transition-all">Cancel</button>
-                                <button onClick={async () => {
-                                  setShowPayloadPreview(false);
-                                  setRebookLoading(true); setError('');
-                                  try {
-                                    const res = await fetch('/api/exam/rebook', {
-                                      method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                      body: JSON.stringify(pendingPayload)
-                                    });
-                                    const json = await res.json();
-                                    setRebookResult(json);
-                                    if (json.success) { setRebookSelected(null); setRescheduleNewDate(''); setRescheduleCategory(''); setRebookCategorySearch(''); setRescheduleCity(''); setRescheduleCenter(''); setRebookExamSessionId(''); setRebookAvailableSessions([]); setRebookT2hubCenters([]); setRebookLanguages([]); setRebookSessionsSource('none'); handleLoadSessions(); }
-                                    else setError(json.error || 'Rebook failed.');
-                                  } catch { setError('Rebook request failed.'); } finally { setRebookLoading(false); setPendingPayload(null); }
-                                }} disabled={rebookLoading}
-                                  className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/[0.06] disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
-                                  {rebookLoading ? 'Rebooking...' : 'Confirm & Send to SVPI'}
-                                </button>
-                              </div>
-                            </div>
-                          ) : (
-                            <div className="flex gap-2">
-                              <button onClick={() => { setRebookSelected(null); setRescheduleCategory(''); setRebookCategorySearch(''); setRescheduleCity(''); setRescheduleCenter(''); setRescheduleNewDate(''); setRebookExamSessionId(''); setRebookAvailableSessions([]); setRebookT2hubCenters([]); setRebookLanguages([]); setRebookSessionsSource('none'); }} className="flex-1 py-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-xl text-slate-400 text-xs border border-white/[0.08] transition-all">Cancel</button>
-                              <button onClick={() => {
-                                if (!rescheduleNewDate || !rescheduleCategory || !rescheduleCity) { setError('Please select city and date.'); return; }
-                                if (!rebookExamSessionId) { setError('Please select an available exam session.'); return; }
-                                if (!rescheduleCenter) { setError('Please select a test center.'); return; }
-                                const cityObj = rescheduleCities.find(c => c.id === rescheduleCity);
-                                const cityName = cityObj ? cityObj.name : '';
-                                if (!cityName) { setError('City name not found.'); return; }
-                                const occupationId = rebookSelected?.session?.occupation?.id;
-                                if (!occupationId) { setError('Occupation not found on the reservation.'); return; }
-                                if (!rebookLanguage) { setError('Please select a language.'); return; }
-                                const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
-                                const selectedCenter = rescheduleCenters.find(c => String(c.id) === String(rescheduleCenter));
-                                const selectedT2hubCenter = rebookT2hubCenters.find(c => String(c.id) === String(rescheduleCenter));
-                                const selectedCenterName = selectedT2hubCenter?.full_name || selectedCenter?.name || '';
-                                if (!selectedSessionData) { setError('The selected session is no longer in the session list. Reload sessions and pick again before submitting.'); return; }
-                                if (selectedCenterName && selectedSessionData.centerName && selectedSessionData.centerName !== selectedCenterName) {
-                                  setError(`Blocked: the selected session belongs to "${selectedSessionData.centerName}", not "${selectedCenterName}". Reload the session list before submitting.`);
-                                  return;
-                                }
-                                const body = {
-                                  categoryId: rescheduleCategory,
-                                  occupationId,
-                                  examSessionId: rebookExamSessionId,
-                                  languageCode: rebookLanguage,
-                                  methodology: rebookSelected?.session?.methodology || 'in_person',
-                                  newDate: rescheduleNewDate,
-                                  cityName: selectedT2hubCenter?.city || selectedCenter?.city || cityName,
-                                  siteId: selectedT2hubCenter ? null : (selectedCenter?.id ?? selectedSessionData?.siteId ?? null),
-                                  siteCity: selectedT2hubCenter?.city || selectedCenter?.city || selectedSessionData?.city || cityName || null,
-                                  duration: selectedSessionData?.duration ?? null,
-                                  startAt: selectedSessionData?.startAt || null,
-                                  testCenter: selectedT2hubCenter?.full_name || selectedCenter?.name || selectedSessionData?.centerName || '',
-                                  testCenterName: selectedT2hubCenter ? selectedT2hubCenter.full_name : undefined,
-                                  sessionTime: selectedSessionData?.time || '',
-                                  sessionsSource: rebookSessionsSource
-                                };
-                                setPendingPayload({ ...body, _rebook: true });
-                                setShowPayloadPreview(true);
-                              }} disabled={!rescheduleNewDate || !rescheduleCategory || !rescheduleCity || !rebookExamSessionId || !rescheduleCenter}
-                                className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/[0.06] disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
-                                Review Payload
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      )}
+                                Language (SVPI prometric code) {rebookLanguages.length === 0 && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">from reservation category</span>}
+                             </label>
+                             <select value={rebookLanguage} onChange={(e) => { setRebookLanguage(e.target.value); setRebookExamSessionId(''); }} disabled={rebookLanguages.length === 0}
+                               className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
+                               <option value="">{rebookLanguages.length === 0 ? 'No languages available' : '-- Select Language --'}</option>
+                               {rebookLanguages.map((l) => <option key={l.id} value={l.code}>{l.english_name} ({l.code})</option>)}
+                             </select>
+                             <p className="mt-1 text-[10px] text-slate-500">SVPI must receive the prometric code (e.g. LOABB), not the ISO code (e.g. bn).</p>
+                           </div>
+                           <div>
+                             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                               City {rebookLoadingCities && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
+                             </label>
+                             <select value={rebookCity} onChange={(e) => { setRebookCity(e.target.value); setRebookCenter(''); setRebookNewDate(''); setRebookAvailableSessions([]); setRebookExamSessionId(''); }} disabled={!rebookCategory || rebookLoadingCities}
+                               className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
+                               <option value="">{!rebookCategory ? 'Select category first' : rebookLoadingCities ? 'Loading cities...' : '-- Select City --'}</option>
+                               {rebookCities.map((city) => <option key={city.id} value={city.id}>{city.name}</option>)}
+                             </select>
+                           </div>
+                           {rebookCity && rebookT2hubCenters.length > 0 && (
+                             <div>
+                               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                 Exact Test Centers ({rebookT2hubCenters.length} on {rebookNewDate || 'selected date'})
+                               </label>
+                               <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                 {rebookT2hubCenters.map(center => {
+                                   const isSel = String(rebookCenter) === String(center.id);
+                                   return (
+                                     <button key={center.id} type="button" onClick={() => { setRebookCenter(String(center.id)); setRebookExamSessionId(''); }}
+                                       className={`w-full text-left p-3 rounded-xl border transition-all ${isSel ? 'bg-emerald-600/20 border-emerald-500/50 ring-1 ring-emerald-500/30' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06]'}`}>
+                                       <div className="flex items-center justify-between gap-2">
+                                         <div className="min-w-0">
+                                           <div className="text-sm font-medium text-white truncate">{center.full_name}</div>
+                                           <div className="text-[10px] text-slate-500">{center.city}{center.totalSeats != null ? ` · ${center.totalSeats} seats total` : ''}</div>
+                                         </div>
+                                         <div className="flex items-center gap-2 shrink-0">
+                                           <span className={`text-[10px] px-2 py-0.5 rounded-full ${center.available === true ? 'bg-emerald-500/10 border border-emerald-500/25 text-emerald-300' : 'bg-white/[0.04] border border-white/[0.08] text-slate-400'}`}>
+                                             {center.available === true ? `Available · ${center.sessionsCount} session${center.sessionsCount === 1 ? '' : 's'}` : `${center.sessionsCount} session${center.sessionsCount === 1 ? '' : 's'}`}
+                                           </span>
+                                           <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSel ? 'border-emerald-400 bg-emerald-400' : 'border-white/[0.15]'}`}>
+                                             {isSel && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                           </div>
+                                         </div>
+                                       </div>
+                                     </button>
+                                   );
+                                 })}
+                               </div>
+                               <p className="mt-1 text-[10px] text-slate-500">These are the exact centers with available sessions on this date. Pick one to see its sessions — the center shown is the one SVPI will assign.</p>
+                             </div>
+                           )}
+                           {rebookCity && rebookT2hubCenters.length === 0 && rebookCenters.length > 0 && (
+                             <div>
+                               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                 Test Center {rebookLoadingCenters && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
+                               </label>
+                               <select value={rebookCenter} onChange={(e) => { setRebookCenter(e.target.value); setRebookNewDate(''); setRebookExamSessionId(''); }} disabled={rebookLoadingCenters}
+                                 className="w-full px-4 py-2.5 bg-white/[0.05] border border-white/[0.08] rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-all disabled:opacity-40 disabled:cursor-not-allowed appearance-none cursor-pointer">
+                                 <option value="">{rebookLoadingCenters ? 'Loading centers...' : '-- Select Center --'}</option>
+                                 {rebookCenters.map((c) => <option key={c.id} value={c.id}>{c.name}{c.city ? ` - ${c.city}` : ''}</option>)}
+                               </select>
+                               <p className="mt-1 text-[10px] text-slate-500">The center id you pick ({rebookCenter || 'none yet'}) is sent to SVPI as test_center_id. SVPI does not reliably scope sessions to one center, so the assigned center is read back and verified after booking — a mismatch is auto-reverted/cancelled.</p>
+                             </div>
+                           )}
+                           {rebookCity && (
+                           <div>
+                             <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">Exam Date</label>
+                             <Calendar value={rebookNewDate} onChange={(v) => { setRebookNewDate(v); setRebookExamSessionId(''); }} minDate={minDate} availableDates={rebookEffectiveAvailableDates} loading={rebookLoadingDates} source={rebookEffectiveDateSource} />
+                           </div>
+                           )}
+                           {rebookNewDate && (
+                             <div>
+                               <label className="mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+                                 Available Session {rebookLoadingSessions && <span className="ml-2 text-[10px] text-emerald-400 normal-case tracking-normal">Loading...</span>}
+                               </label>
+                               {rebookLoadingSessions ? (
+                                 <div className="flex items-center gap-2 text-xs text-slate-500 py-2">
+                                   <div className="w-3 h-3 border-[1.5px] border-emerald-500/30 border-t-emerald-400 rounded-full animate-spin" />
+                                   Fetching available sessions...
+                                 </div>
+                               ) : (() => {
+                                 const selectedT2hubForFilter = rebookT2hubCenters.find(c => String(c.id) === String(rebookCenter));
+                                 const selectedCenterForFilter = rebookCenters.find(c => String(c.id) === String(rebookCenter)) || (selectedT2hubForFilter ? { name: selectedT2hubForFilter.full_name } : null);
+                                 const filteredSessions = rebookAvailableSessions.filter(s => {
+                                   if (!rebookCenter) return true;
+                                   const centerId = s.raw?.test_center?.id ?? s.raw?.test_center_id ?? s.test_center?.id ?? s.test_center_id ?? null;
+                                   const hasCenterInfo = centerId != null || s.siteId != null || !!s.centerName;
+                                   if (!hasCenterInfo) return rebookSessionsSource !== 'prometric';
+                                   if (centerId != null && String(centerId) === String(rebookCenter)) return true;
+                                   if (String(s.siteId ?? '') === String(rebookCenter)) return true;
+                                   return !!selectedCenterForFilter && s.centerName === selectedCenterForFilter.name;
+                                 });
+                                 const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
+                                 if (filteredSessions.length > 0) {
+                                   return (
+                                     <div className="space-y-1.5 max-h-48 overflow-y-auto">
+                                       {filteredSessions.map((s, idx) => {
+                                         const sessionId = s.id || idx;
+                                         const isSelected = rebookExamSessionId === String(sessionId);
+                                         const time = s.time ? formatSessionTime(s.raw || s) : '';
+                                         const date = s.date || '';
+                                         const centerName = s.centerName || '';
+                                         const centerCity = s.city || '';
+                                         const slots = s.seats ?? '';
+                                         const dateMatch = date && rebookNewDate ? toIsoDate(date) === toIsoDate(rebookNewDate) : true;
+                                         return (
+                                           <button key={sessionId || idx} type="button" onClick={() => { setRebookExamSessionId(isSelected ? '' : String(sessionId)); }}
+                                             className={`w-full text-left p-3 rounded-xl border transition-all ${isSelected ? 'bg-emerald-600/20 border-emerald-500/50 ring-1 ring-emerald-500/30' : 'bg-white/[0.03] border-white/[0.06] hover:border-white/[0.12] hover:bg-white/[0.06]'}`}>
+                                             <div className="flex items-center justify-between">
+                                               <div className="min-w-0">
+                                                 <div className="flex items-center gap-2 flex-wrap">
+                                                   {time && <span className="text-sm font-medium text-white">{time}</span>}
+                                                   {date && <span className="text-xs text-emerald-400">{date}</span>}
+                                                   {!time && !date && <span className="text-sm font-medium text-slate-400">Session #{idx + 1}</span>}
+                                                 </div>
+                                                 {(centerName || centerCity) && <div className="text-xs font-medium text-amber-400/90 mt-0.5 truncate">{[centerName, centerCity].filter(Boolean).join(', ')}</div>}
+                                                 {!dateMatch && date && <div className="text-[10px] text-amber-400/70 mt-0.5">This session&apos;s date differs from selected</div>}
+                                               </div>
+                                               <div className="flex items-center gap-2 shrink-0">
+                                                 {slots !== '' && slots !== null && <span className="text-[10px] text-slate-500">{slots} seats</span>}
+                                                 <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${isSelected ? 'border-emerald-400 bg-emerald-400' : 'border-white/[0.15]'}`}>
+                                                   {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                                 </div>
+                                               </div>
+                                             </div>
+                                           </button>
+                                         );
+                                       })}
+                                     </div>
+                                   );
+                                 } else {
+                                   const rebookCityName = rebookCenters.find(c => String(c.id) === String(rebookCenter))?.city || rebookT2hubCenters.find(c => String(c.id) === String(rebookCenter))?.city || rebookCities.find(c => c.id === rebookCity)?.name || '';
+                                   const rebookCenterName = rebookCenters.find(c => String(c.id) === String(rebookCenter))?.name || rebookT2hubCenters.find(c => String(c.id) === String(rebookCenter))?.full_name || '';
+                                   return (
+                                     <div className="text-xs text-slate-500 py-2">
+                                       {rebookCenter
+                                         ? `No sessions available at ${rebookCenterName || `center #${rebookCenter}`} on this date. Try a different date or center.`
+                                         : 'No sessions found for this date. Try a different date or city.'}
+                                     </div>
+                                   );
+                                 }
+                               })()}
+                             </div>
+                           )}
+                           {showPayloadPreview && pendingPayload && pendingPayload._rebook ? (
+                             <div className="w-full space-y-3">
+                               <div className="p-3 bg-white/[0.04] border border-emerald-500/30 rounded-xl">
+                                 <div className="text-xs font-semibold text-emerald-400 uppercase tracking-wider mb-2">Payload Preview — Exact data sent to SVPI</div>
+                                 <pre className="text-xs text-slate-300 bg-black/30 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap font-mono">{JSON.stringify(pendingPayload, null, 2)}</pre>
+                               </div>
+                               <div className="flex gap-2">
+                                 <button onClick={() => { setShowPayloadPreview(false); setPendingPayload(null); }} className="flex-1 py-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-xl text-slate-400 text-xs border border-white/[0.08] transition-all">Cancel</button>
+                                 <button onClick={async () => {
+                                   setShowPayloadPreview(false);
+                                   setRebookLoading(true); setError('');
+                                   try {
+                                     const res = await fetch('/api/exam/rebook', {
+                                       method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                       body: JSON.stringify(pendingPayload)
+                                     });
+                                     const json = await res.json();
+                                     setRebookResult(json);
+                                     if (json.success) { setRebookSelected(null); setRebookNewDate(''); setRebookCategory(''); setRebookCategorySearch(''); setRebookCity(''); setRebookCenter(''); setRebookExamSessionId(''); setRebookAvailableSessions([]); setRebookT2hubCenters([]); setRebookLanguages([]); setRebookSessionsSource('none'); handleLoadSessions(); }
+                                     else setError(json.error || 'Rebook failed.');
+                                   } catch { setError('Rebook request failed.'); } finally { setRebookLoading(false); setPendingPayload(null); }
+                                 }} disabled={rebookLoading}
+                                   className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/[0.06] disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
+                                   {rebookLoading ? 'Rebooking...' : 'Confirm & Send to SVPI'}
+                                 </button>
+                               </div>
+                             </div>
+                           ) : (
+                             <div className="flex gap-2">
+                               <button onClick={() => { setRebookSelected(null); setRebookCategory(''); setRebookCategorySearch(''); setRebookCity(''); setRebookCenter(''); setRebookNewDate(''); setRebookExamSessionId(''); setRebookAvailableSessions([]); setRebookT2hubCenters([]); setRebookLanguages([]); setRebookSessionsSource('none'); }} className="flex-1 py-2 bg-white/[0.05] hover:bg-white/[0.1] rounded-xl text-slate-400 text-xs border border-white/[0.08] transition-all">Cancel</button>
+                               <button onClick={() => {
+                                 if (!rebookNewDate || !rebookCategory || !rebookCity) { setError('Please select city and date.'); return; }
+                                 if (!rebookExamSessionId) { setError('Please select an available exam session.'); return; }
+                                 if (!rebookCenter) { setError('Please select a test center.'); return; }
+                                 const cityObj = rebookCities.find(c => c.id === rebookCity);
+                                 const cityName = cityObj ? cityObj.name : '';
+                                 if (!cityName) { setError('City name not found.'); return; }
+                                 const occupationId = rebookSelected?.session?.occupation?.id;
+                                 if (!occupationId) { setError('Occupation not found on the reservation.'); return; }
+                                 if (!rebookLanguage) { setError('Please select a language.'); return; }
+                                 const selectedSessionData = rebookAvailableSessions.find(s => String(s.id) === rebookExamSessionId);
+                                 const selectedCenter = rebookCenters.find(c => String(c.id) === String(rebookCenter));
+                                 const selectedT2hubCenter = rebookT2hubCenters.find(c => String(c.id) === String(rebookCenter));
+                                 const selectedCenterName = selectedT2hubCenter?.full_name || selectedCenter?.name || '';
+                                 if (!selectedSessionData) { setError('The selected session is no longer in the session list. Reload sessions and pick again before submitting.'); return; }
+                                 if (selectedCenterName && selectedSessionData.centerName && selectedSessionData.centerName !== selectedCenterName) {
+                                   setError(`Blocked: the selected session belongs to "${selectedSessionData.centerName}", not "${selectedCenterName}". Reload the session list before submitting.`);
+                                   return;
+                                 }
+                                 const body = {
+                                   categoryId: rebookCategory,
+                                   occupationId,
+                                   examSessionId: rebookExamSessionId,
+                                   languageCode: rebookLanguage,
+                                   methodology: rebookSelected?.session?.methodology || 'in_person',
+                                   newDate: rebookNewDate,
+                                   cityName: selectedT2hubCenter?.city || selectedCenter?.city || cityName,
+                                   siteId: selectedT2hubCenter ? null : (selectedCenter?.id ?? selectedSessionData?.siteId ?? null),
+                                   siteCity: selectedT2hubCenter?.city || selectedCenter?.city || selectedSessionData?.city || cityName || null,
+                                   duration: selectedSessionData?.duration ?? null,
+                                   startAt: selectedSessionData?.startAt || null,
+                                   testCenter: selectedT2hubCenter?.full_name || selectedCenter?.name || selectedSessionData?.centerName || '',
+                                   testCenterName: selectedT2hubCenter ? selectedT2hubCenter.full_name : undefined,
+                                   sessionTime: selectedSessionData?.time || '',
+                                   sessionsSource: rebookSessionsSource
+                                 };
+                                 setPendingPayload({ ...body, _rebook: true });
+                                 setShowPayloadPreview(true);
+                               }} disabled={!rebookNewDate || !rebookCategory || !rebookCity || !rebookExamSessionId || !rebookCenter}
+                                 className="flex-[2] py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/[0.06] disabled:text-slate-500 rounded-xl text-white text-xs font-semibold transition-all">
+                                 Review Payload
+                               </button>
+                             </div>
+                           )}
+                         </div>
+                       )}
                     </div>
                   );
                 })}
